@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador Automático - Projeto Auth</title>
+    <title>Sistema de Autenticação</title>
     <style>
         * {
             margin: 0;
@@ -26,85 +26,55 @@
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 700px;
+            max-width: 400px;
             padding: 40px;
         }
 
-        h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .subtitle {
-            color: #666;
+        .logo {
+            text-align: center;
             margin-bottom: 30px;
-            font-size: 15px;
-            line-height: 1.6;
         }
 
-        .steps {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 25px;
+        .logo h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 8px;
         }
 
-        .step {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .step:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .step-number {
-            background: #667eea;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .step-content {
-            flex: 1;
-        }
-
-        .step-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .step-desc {
+        .logo p {
             color: #666;
             font-size: 14px;
         }
 
-        .btn-container {
-            display: flex;
-            gap: 12px;
+        .form-group {
             margin-bottom: 20px;
         }
 
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
         .btn {
-            flex: 1;
-            padding: 16px;
+            width: 100%;
+            padding: 14px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -122,268 +92,46 @@
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
         .btn.secondary {
-            background: #6c757d;
-        }
-
-        .structure {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            overflow-x: auto;
-            margin-bottom: 20px;
-        }
-
-        .structure-title {
-            color: #4ec9b0;
-            margin-bottom: 10px;
-        }
-
-        .file { color: #9cdcfe; }
-        .folder { color: #dcdcaa; }
-
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .alert.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert.info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .alert.warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        code {
-            background: #f4f4f4;
-            padding: 3px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: #e83e8c;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #progress {
-            margin-top: 20px;
-        }
-
-        .progress-bar {
-            background: #e9ecef;
-            height: 30px;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .file-status {
-            font-size: 13px;
-            color: #666;
-            margin-top: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🚀 Gerador Automático</h1>
-        <p class="subtitle">
-            Este gerador criará automaticamente todos os arquivos do projeto de autenticação 
-            com a estrutura correta para a Vercel.
-        </p>
-
-        <div class="alert warning">
-            <strong>⚠️ IMPORTANTE:</strong> Depois de gerar os arquivos, você precisará executar 
-            <code>npm install</code> na pasta do projeto antes de fazer o deploy.
-        </div>
-
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <div class="step-title">Clique em "Gerar Projeto"</div>
-                    <div class="step-desc">Os arquivos serão baixados automaticamente</div>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <div class="step-title">Organize os arquivos</div>
-                    <div class="step-desc">Coloque os arquivos conforme a estrutura abaixo</div>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <div class="step-title">Instale as dependências</div>
-                    <div class="step-desc">Execute <code>npm install</code> no terminal</div>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <div class="step-content">
-                    <div class="step-title">Faça o deploy</div>
-                    <div class="step-desc">Execute <code>vercel</code> ou arraste no site</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="structure">
-            <div class="structure-title">📁 Estrutura do Projeto:</div>
-auth-vercel/
-├── <span class="file">index.html</span>
-├── <span class="file">package.json</span>
-├── <span class="file">vercel.json</span>
-└── <span class="folder">api/</span>
-    ├── <span class="file">_session.js</span>
-    ├── <span class="file">login.js</span>
-    ├── <span class="file">logout.js</span>
-    └── <span class="file">check-session.js</span>
-        </div>
-
-        <div class="btn-container">
-            <button class="btn" onclick="generateProject()" id="generateBtn">
-                📦 Gerar Projeto Completo
-            </button>
-        </div>
-
-        <div id="progress" class="hidden">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill">0%</div>
-            </div>
-            <div class="file-status" id="fileStatus">Preparando...</div>
-        </div>
-
-        <div id="successMessage" class="alert success hidden">
-            <strong>✅ Sucesso!</strong> Todos os arquivos foram gerados. 
-            Agora organize-os conforme a estrutura mostrada acima e execute <code>npm install</code>.
-        </div>
-
-        <div id="instructions" class="alert info hidden">
-            <strong>📋 Próximos passos:</strong><br><br>
-            1. Crie uma pasta chamada <code>auth-vercel</code><br>
-            2. Coloque <code>index.html</code>, <code>package.json</code> e <code>vercel.json</code> na raiz<br>
-            3. Crie a pasta <code>api/</code> e coloque os 4 arquivos .js dentro<br>
-            4. Abra o terminal na pasta e execute: <code>npm install</code><br>
-            5. Execute: <code>vercel</code><br><br>
-            <strong>Credenciais de teste:</strong> admin / 123
-        </div>
-    </div>
-
-    <script>
-        const files = {
-            'index.html': `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Autenticação</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
-        }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { color: #667eea; font-size: 28px; margin-bottom: 8px; }
-        .logo p { color: #666; font-size: 14px; }
-        .form-group { margin-bottom: 20px; }
-        label {
-            display: block;
-            margin-bottom: 8px;
+            background: #f0f0f0;
             color: #333;
-            font-weight: 500;
-            font-size: 14px;
+            margin-top: 12px;
         }
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
-        }
-        input:focus { outline: none; border-color: #667eea; }
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn.secondary { background: #f0f0f0; color: #333; margin-top: 12px; }
+
         .message {
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
             font-size: 14px;
         }
-        .message.success { background: #d4edda; color: #155724; }
-        .message.error { background: #f8d7da; color: #721c24; }
-        .hidden { display: none; }
-        .dashboard { text-align: center; }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .dashboard {
+            text-align: center;
+        }
+
         .user-info {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
         }
+
         .credentials-hint {
             background: #fff3cd;
             padding: 12px;
@@ -392,7 +140,12 @@ auth-vercel/
             font-size: 13px;
             color: #856404;
         }
-        .loading { text-align: center; padding: 20px; }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
         .spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #667eea;
@@ -402,6 +155,7 @@ auth-vercel/
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -410,63 +164,79 @@ auth-vercel/
 </head>
 <body>
     <div class="container">
+        <!-- Loading -->
         <div id="loadingScreen" class="loading">
             <div class="spinner"></div>
             <p style="margin-top: 16px; color: #666;">Verificando sessão...</p>
         </div>
+
+        <!-- Login -->
         <div id="loginScreen" class="hidden">
             <div class="logo">
                 <h1>Bem-vindo</h1>
                 <p>Faça login para continuar</p>
             </div>
+
             <div class="credentials-hint">
                 <strong>Credenciais de teste:</strong><br>
                 Usuário: <strong>admin</strong> | Senha: <strong>123</strong>
             </div>
+
             <div id="loginMessage" class="message hidden"></div>
+
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username">Usuário</label>
                     <input type="text" id="username" required>
                 </div>
+
                 <div class="form-group">
                     <label for="password">Senha</label>
                     <input type="password" id="password" required>
                 </div>
+
                 <button type="submit" class="btn" id="loginBtn">Entrar</button>
             </form>
         </div>
+
+        <!-- Dashboard -->
         <div id="dashboardScreen" class="dashboard hidden">
             <div class="logo">
                 <h1>Dashboard</h1>
                 <p>Você está autenticado!</p>
             </div>
+
             <div class="user-info">
                 <p><strong>Usuário:</strong> <span id="dashboardUser"></span></p>
                 <p style="margin-top: 8px;"><strong>Status:</strong> 
                     <span style="color: #28a745;">● Online</span>
                 </p>
             </div>
+
             <button class="btn secondary" onclick="handleLogout()">Sair</button>
         </div>
     </div>
+
     <script>
         function showMessage(elementId, text, type) {
             const el = document.getElementById(elementId);
             el.textContent = text;
-            el.className = \`message \${type}\`;
+            el.className = `message ${type}`;
             el.classList.remove('hidden');
         }
+
         function showScreen(screenId) {
             ['loadingScreen', 'loginScreen', 'dashboardScreen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
         }
+
         async function checkSession() {
             try {
                 const res = await fetch('/api/check-session');
                 const data = await res.json();
+                
                 if (data.authenticated) {
                     document.getElementById('dashboardUser').textContent = data.user;
                     showScreen('dashboardScreen');
@@ -478,20 +248,26 @@ auth-vercel/
                 showScreen('loginScreen');
             }
         }
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.textContent = 'Entrando...';
+            
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
+            
             try {
                 const res = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user, pass })
                 });
+                
                 const data = await res.json();
+                
                 if (data.success) {
                     showMessage('loginMessage', data.message, 'success');
                     setTimeout(() => {
@@ -509,6 +285,7 @@ auth-vercel/
                 btn.textContent = 'Entrar';
             }
         });
+
         async function handleLogout() {
             try {
                 await fetch('/api/logout', { method: 'POST' });
@@ -519,196 +296,9 @@ auth-vercel/
                 console.error('Erro ao fazer logout:', error);
             }
         }
+
+        // Verifica sessão ao carregar
         window.addEventListener('load', checkSession);
-    </script>
-</body>
-</html>`,
-
-            'package.json': `{
-  "name": "auth-vercel",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "cookie": "^0.6.0"
-  }
-}`,
-
-            'vercel.json': `{
-  "cleanUrls": true
-}`,
-
-            'api/_session.js': `import cookie from 'cookie';
-
-const sessions = {};
-
-export function createSession(res, user) {
-  const id = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-  sessions[id] = { user, expires: Date.now() + 30 * 60 * 1000 };
-  res.setHeader('Set-Cookie', cookie.serialize('SESSION', id, {
-    httpOnly: true,
-    path: '/',
-    maxAge: 30 * 60,
-    sameSite: 'lax'
-  }));
-  return id;
-}
-
-export function getSession(req) {
-  const cookies = cookie.parse(req.headers.cookie || '');
-  const id = cookies.SESSION;
-  if (!id || !sessions[id]) return null;
-  if (sessions[id].expires < Date.now()) {
-    delete sessions[id];
-    return null;
-  }
-  return sessions[id];
-}
-
-export function destroySession(req, res) {
-  const cookies = cookie.parse(req.headers.cookie || '');
-  const id = cookies.SESSION;
-  if (id) delete sessions[id];
-  res.setHeader('Set-Cookie', cookie.serialize('SESSION', '', {
-    path: '/',
-    maxAge: 0
-  }));
-}`,
-
-            'api/login.js': `import { createSession } from './_session.js';
-
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-  
-  const { user, pass } = req.body;
-  
-  if (user === 'admin' && pass === '123') {
-    createSession(res, user);
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Login realizado com sucesso',
-      user 
-    });
-  }
-  
-  return res.status(401).json({ 
-    success: false, 
-    message: 'Credenciais inválidas' 
-  });
-}`,
-
-            'api/logout.js': `import { destroySession } from './_session.js';
-
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-  
-  destroySession(req, res);
-  return res.status(200).json({ 
-    success: true, 
-    message: 'Logout realizado com sucesso' 
-  });
-}`,
-
-            'api/check-session.js': `import { getSession } from './_session.js';
-
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  
-  const session = getSession(req);
-  
-  if (!session) {
-    return res.status(401).json({ authenticated: false });
-  }
-  
-  return res.status(200).json({ 
-    authenticated: true, 
-    user: session.user 
-  });
-}`
-        };
-
-        function downloadFile(filename, content) {
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        async function generateProject() {
-            const btn = document.getElementById('generateBtn');
-            const progress = document.getElementById('progress');
-            const progressFill = document.getElementById('progressFill');
-            const fileStatus = document.getElementById('fileStatus');
-            const successMessage = document.getElementById('successMessage');
-            const instructions = document.getElementById('instructions');
-
-            btn.disabled = true;
-            btn.textContent = '⏳ Gerando...';
-            progress.classList.remove('hidden');
-            successMessage.classList.add('hidden');
-            instructions.classList.add('hidden');
-
-            const fileList = Object.keys(files);
-            const total = fileList.length;
-
-            for (let i = 0; i < total; i++) {
-                const filename = fileList[i];
-                const content = files[filename];
-                
-                fileStatus.textContent = `Gerando: ${filename}`;
-                const percent = Math.round(((i + 1) / total) * 100);
-                progressFill.style.width = percent + '%';
-                progressFill.textContent = percent + '%';
-
-                await new Promise(resolve => setTimeout(resolve, 300));
-                downloadFile(filename, content);
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            successMessage.classList.remove('hidden');
-            instructions.classList.remove('hidden');
-            btn.textContent = '✅ Projeto Gerado!';
-            
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.textContent = '📦 Gerar Projeto Novamente';
-            }, 2000);
-        }
     </script>
 </body>
 </html>
