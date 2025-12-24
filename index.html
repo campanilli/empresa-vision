@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Autenticação</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -20,7 +15,6 @@
             align-items: center;
             padding: 20px;
         }
-
         .container {
             background: white;
             border-radius: 12px;
@@ -29,27 +23,10 @@
             max-width: 400px;
             padding: 40px;
         }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo h1 {
-            color: #667eea;
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .logo p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #667eea; font-size: 28px; margin-bottom: 8px; }
+        .logo p { color: #666; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
         label {
             display: block;
             margin-bottom: 8px;
@@ -57,7 +34,6 @@
             font-weight: 500;
             font-size: 14px;
         }
-
         input {
             width: 100%;
             padding: 12px 16px;
@@ -66,12 +42,7 @@
             font-size: 15px;
             transition: border-color 0.3s;
         }
-
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
+        input:focus { outline: none; border-color: #667eea; }
         .btn {
             width: 100%;
             padding: 14px;
@@ -84,54 +55,25 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn.secondary {
-            background: #f0f0f0;
-            color: #333;
-            margin-top: 12px;
-        }
-
+        .btn:hover { transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn.secondary { background: #f0f0f0; color: #333; margin-top: 12px; }
         .message {
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
             font-size: 14px;
         }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .dashboard {
-            text-align: center;
-        }
-
+        .message.success { background: #d4edda; color: #155724; }
+        .message.error { background: #f8d7da; color: #721c24; }
+        .hidden { display: none; }
+        .dashboard { text-align: center; }
         .user-info {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
         }
-
         .credentials-hint {
             background: #fff3cd;
             padding: 12px;
@@ -140,12 +82,7 @@
             font-size: 13px;
             color: #856404;
         }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-        }
-
+        .loading { text-align: center; padding: 20px; }
         .spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #667eea;
@@ -155,7 +92,6 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -164,59 +100,46 @@
 </head>
 <body>
     <div class="container">
-        <!-- Loading -->
         <div id="loadingScreen" class="loading">
             <div class="spinner"></div>
             <p style="margin-top: 16px; color: #666;">Verificando sessão...</p>
         </div>
-
-        <!-- Login -->
         <div id="loginScreen" class="hidden">
             <div class="logo">
                 <h1>Bem-vindo</h1>
                 <p>Faça login para continuar</p>
             </div>
-
             <div class="credentials-hint">
                 <strong>Credenciais de teste:</strong><br>
                 Usuário: <strong>admin</strong> | Senha: <strong>123</strong>
             </div>
-
             <div id="loginMessage" class="message hidden"></div>
-
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username">Usuário</label>
                     <input type="text" id="username" required>
                 </div>
-
                 <div class="form-group">
                     <label for="password">Senha</label>
                     <input type="password" id="password" required>
                 </div>
-
                 <button type="submit" class="btn" id="loginBtn">Entrar</button>
             </form>
         </div>
-
-        <!-- Dashboard -->
         <div id="dashboardScreen" class="dashboard hidden">
             <div class="logo">
                 <h1>Dashboard</h1>
                 <p>Você está autenticado!</p>
             </div>
-
             <div class="user-info">
                 <p><strong>Usuário:</strong> <span id="dashboardUser"></span></p>
                 <p style="margin-top: 8px;"><strong>Status:</strong> 
                     <span style="color: #28a745;">● Online</span>
                 </p>
             </div>
-
             <button class="btn secondary" onclick="handleLogout()">Sair</button>
         </div>
     </div>
-
     <script>
         function showMessage(elementId, text, type) {
             const el = document.getElementById(elementId);
@@ -224,19 +147,16 @@
             el.className = `message ${type}`;
             el.classList.remove('hidden');
         }
-
         function showScreen(screenId) {
             ['loadingScreen', 'loginScreen', 'dashboardScreen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
         }
-
         async function checkSession() {
             try {
                 const res = await fetch('/api/check-session');
                 const data = await res.json();
-                
                 if (data.authenticated) {
                     document.getElementById('dashboardUser').textContent = data.user;
                     showScreen('dashboardScreen');
@@ -248,26 +168,20 @@
                 showScreen('loginScreen');
             }
         }
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
             btn.textContent = 'Entrando...';
-            
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            
             try {
                 const res = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user, pass })
                 });
-                
                 const data = await res.json();
-                
                 if (data.success) {
                     showMessage('loginMessage', data.message, 'success');
                     setTimeout(() => {
@@ -285,7 +199,6 @@
                 btn.textContent = 'Entrar';
             }
         });
-
         async function handleLogout() {
             try {
                 await fetch('/api/logout', { method: 'POST' });
@@ -296,8 +209,6 @@
                 console.error('Erro ao fazer logout:', error);
             }
         }
-
-        // Verifica sessão ao carregar
         window.addEventListener('load', checkSession);
     </script>
 </body>

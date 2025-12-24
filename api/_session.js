@@ -8,13 +8,13 @@ export function createSession(res, user) {
   
   sessions[id] = { 
     user, 
-    expires: Date.now() + 30 * 60 * 1000 // 30 minutos
+    expires: Date.now() + 30 * 60 * 1000
   };
   
   res.setHeader('Set-Cookie', cookie.serialize('SESSION', id, {
     httpOnly: true,
     path: '/',
-    maxAge: 30 * 60, // 30 minutos
+    maxAge: 30 * 60,
     sameSite: 'lax'
   }));
   
