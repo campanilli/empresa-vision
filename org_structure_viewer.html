@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estrutura Organizacional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .filter-btn.active {
+            background: #764ba2;
+            color: white;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .team-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .team-title {
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .team-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .role-section {
+            margin-bottom: 15px;
+        }
+
+        .role-title {
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-subtitle {
+            font-size: 0.75em;
+            color: #999;
+            margin-top: 4px;
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .person-card {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            border-left: 3px solid #667eea;
+        }
+
+        .person-card:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .person-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .person-email {
+            color: #666;
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+
+        .person-email a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .person-email a:hover {
+            text-decoration: underline;
+        }
+
+        .members-list {
+            margin-top: 10px;
+        }
+
+        .software-card {
+            background: #fff3e0;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ff9800;
+            transition: all 0.2s ease;
+        }
+
+        .software-card:hover {
+            background: #ffe0b2;
+            transform: translateX(5px);
+        }
+
+        .software-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .software-name {
+            font-weight: 600;
+            color: #e65100;
+            font-size: 1em;
+        }
+
+        .software-version {
+            background: #ff9800;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .software-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85em;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .software-detail {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .software-detail strong {
+            color: #e65100;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            margin-top: 50px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .teams-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Estrutura Organizacional</h1>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Pesquisar por nome ou email...">
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Todos</button>
+            <button class="filter-btn" data-filter="Residencial">Residencial</button>
+            <button class="filter-btn" data-filter="Movel">Móvel</button>
+            <button class="filter-btn" data-filter="Empresarial">Empresarial</button>
+            <button class="filter-btn" data-filter="All">Geral</button>
+        </div>
+
+        <div id="teamsContainer" class="teams-grid"></div>
+    </div>
+
+    <script>
+        const orgData = {
+  "Residencial": {
+    "Middleware ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Thiago Campanilli", "email": "thiago.campanilli@claro.com.br" },
+      "lider": { "nome": "Fabio Vieira", "email": "fabio.vieira@itshare.com.br" },
+      "softwares": [
+        { "nome": "Automação de Vendas", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Combomulti", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Fepp", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "NETSales", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Atlas Antigo", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Perfil", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Sigma Web", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "NETSMS", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Atlas", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "NETSSI", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Novo Módulo de Cobranças", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Retenção e Reverção", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "apigee", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "ALDSP (AquaLogic Data Services Platform)", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "ESB (Enterprise Service Bus)", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "OSB (Oracle Service Bus)", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "WLI (WebLogic Integration Administration)", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Weblogic", "versao": "9.2", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Weblogic", "versao": "10.3", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Weblogic", "versao": "12.2.1.0.0 12c", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "Ricardo Lasevicius", "email": "ricardo.lasevicius-itshare@claro.com.br" },
+        { "nome": "Gabriela Martins", "email": "gabriela.martins@itshare.com.br" },
+        { "nome": "Felippe Ribeiro", "email": "felippe.ribeiro@itshare.com.br" },
+        { "nome": "Rodolfo Silva", "email": "rodolfo.silvalima.terceiros@claro.com.br" }
+      ]
+    },
+    "Cloud ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Thiago Campanilli", "email": "thiago.campanilli@claro.com.br" },
+      "lider": { "nome": "N/A", "email": "" },
+      "softwares": [
+        { "nome": "apigee", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "GCP", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "OCI", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "Rodolfo Silva", "email": "rodolfo.silvalima.terceiros@claro.com.br" },
+        { "nome": "Ricardo Lasevicius", "email": "ricardo.lasevicius-itshare@claro.com.br" },
+        { "nome": "Felippe Ribeiro", "email": "felippe.ribeiro@itshare.com.br" },
+      ]
+    },
+    "AgileDB ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Thiago Campanilli", "email": "thiago.campanilli@claro.com.br" },
+      "lider": { "nome": "Felipe Gramari", "email": "felipe.gramari@dxc.com" },
+      "softwares": [
+        { "nome": "agiledb", "versao": "", "tipo": "frontend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "agiledb scripts", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "acm", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "acm", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "acm", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "acm", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "Elisangela Deodato da Silva", "email": "edeodatodas2@dxc.com" },
+        { "nome": "João Vitos Mattos", "email": "joaovitor.mattos@dxc.com" },
+        { "nome": "Kaique Araujo Pinholato Ribeiro", "email": "karaujopinho@dxc.com" }
+      ]
+    },
+    "TRAVAS ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Marco Aurelio Souza Santos", "email": "marco.santos@claro.com.br" },
+      "gestao": { "nome": "Juliana Manenti", "email": "juliana.manenti@claro.com.br" },
+      "lider": { "nome": "Juliana Ivy", "email": "" },
+      "softwares": [
+        { "nome": "APP conexão", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "RPA conexão", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" }
+      ],
+      "membros": [
+        { "nome": "Angelica", "email": "angelica@xbrain.com.br" },
+      ]
+    },
+    "COMBOMULTI ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Marco Aurelio Souza Santos", "email": "marco.santos@claro.com.br" },
+      "gestao": { "nome": "Juliana Manenti", "email": "juliana.manenti@claro.com.br" },
+      "lider": { "nome": "Juliana Ivy", "email": "" },
+      "softwares": [
+        { "nome": "combomulti", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "robô de carga", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "robô ..", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "robô ..", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "robô ..", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" }
+      ],
+      "membros": [
+        { "nome": "Ruhan Bezerra", "email": "ruhan.bezerra@innolevels.com.br" },
+        { "nome": "Douglas Peixoto", "email": "douglas.peixoto@innolevels.com.br" },
+        { "nome": "Guilherme Mattos", "email": "guilherme.mattos@innolevels.com.br" },
+      ]
+    },
+    "Oracle APP's ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "80 4h/dia",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Amaral", "email": "fabio.amaral@claro.com.br" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "Fabio Vieira", "email": "fabio.vieira@itshare.com.br" },
+      "softwares": [
+        { "nome": "TOA", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "Christiano Jésus Morgan da Costa", "email": "cmorgan@spread.com.br" },
+        { "nome": "Rogerio Januario de Oliveira", "email": "rogerio.januario@spread.com.br" },
+      ]
+    },
+    "Migração SIT4, SIT7 & CRT1 ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "Thais Aparecida Franchi Costa", "email": "thais.costa@sysmap.com.br" },
+      "membros": [
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" }
+      ]
+    },
+    "UFT ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "", "email": "" },
+      "gestao": { "nome": "Tatiane Bernardes Carvalho", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" },
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Aplicação patches, releases & refresh ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Williams Thiago Barroso de Macedo", "email": "williams.macedo@spread.com.br" },
+      "lider": { "nome": "Thomas Mathias Ferreira", "email": "thomas.ferreira.terceiros@claro.com.br" },
+      "membros": [
+        { "nome": "Fabio Vieira", "email": "fabio.vieira@itshare.com.br" },
+        { "nome": "Thiago Campanilli", "email": "thiago.campanilli@claro.com.br" }
+      ]
+    }
+  },
+  "Movel": {
+    "Middleware ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Eduardo dos Santos Pedro", "email": "eduardo.pedro@claro.com.br" },
+      "lider": { "nome": "Rogerio Aparecido", "email": "rogerio.aparecido.terceiros@claro.com.br" },
+      "membros": [
+        { "nome": "Cintya Milanez", "email": "cintya.milanez@itshare.com.br" },
+        { "nome": "Ricardo Gragnanello", "email": "ricardo.gragnanello@itshare.com.br" },
+        { "nome": "Roberto Junior", "email": "roberto.junior@itshare.com.br" },
+        { "nome": "Talita Santos", "email": "talita.santos@itshare.com.br" },
+        { "nome": "Daniela Leite", "email": "daniela.leite@itshare.com.br" },
+        { "nome": "Tairine Almeida", "email": "tairine.almeida@itshare.com.br" },
+        { "nome": "Marcos Araujo", "email": "marcos.araujo@itshare.com.br" },
+        { "nome": "Felipe Passos", "email": "felipe.passos@itshare.com.br" },
+        { "nome": "Gustavo Fonseca", "email": "gustavo.fonseca@itshare.com.br" },
+        { "nome": "Danilo Pereira", "email": "danilo.pereira@itshare.com.br" }
+      ]
+    },
+    "Cloud ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "N/A", "email": "" },
+      "lider": { "nome": "Paulo Vinicius Rodrigues", "email": "" },
+      "softwares": [    
+        { "nome": "SAP S/4 HANA", "versao": "aws", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+        { "nome": "AWS", "versao": "", "tipo": "backend", "backend": "", "": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "N/A", "email": "" },
+      ]
+    }
+  },
+  "All": {
+    "DBA ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "N/A", "email": "" },
+      "lider": { "nome": "Wagner Costa", "email": "wagner.costa@itshare.com.br" },
+      "softwares": [
+        { "nome": "Oracle", "versao": "11.2.0.4.0", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Oracle", "versao": "11.2.0.2.0", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "MongoDB", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Postgree", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "MY SQL", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "OGG (Oracle Golden Gate)", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "João Gomes", "email": "joao.gomes.terceiros@claro.com.br" },
+        { "nome": "Bruno Passamani", "email": "bruno.passamani@itshare.com.br" }
+      ]
+    },
+    "Desenvolvimento ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "N/A", "email": "" },
+      "lider": { "nome": "Carlos Faleiro", "email": "carlos.faleiro@itshare.com.br" },
+      "membros": [
+        { "nome": "Priscila Teixeira", "email": "priscila.teixeira@itshare.com.br" },
+        { "nome": "Kauan Neves", "email": "kauan.neves@itshare.com.br" },
+        { "nome": "Kevin Souza", "email": "kevin.souza@itshare.com.br" }
+      ]
+    },
+    "Observabilidade ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "N/A", "email": "" },
+      "lider": { "nome": "N/A", "email": "" },
+      "softwares": [
+        { "nome": "Grafana", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+        { "nome": "Zabbix", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" }
+      ],
+      "membros": [
+        { "nome": "Vanius Oliveira", "email": "vanius.oliveira@itshare.com.br" }
+      ]
+    },
+    "Virtualização ⓐ": {
+      "resumo": "Serviços Virtualizados & Parametrizações",
+      "SLA": "2 dias",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Eduardo dos Santos Pedro", "email": "eduardo.pedro@claro.com.br" },
+      "lider": { "nome": "Douglas Alves de Sousa", "email": "douglas.sousa@betternow.com.br" },
+      "membros": [
+        { "nome": "Isabella de Oliveira Pavanello", "email": "isabella.pavanello@betternow.com.br" },
+        { "nome": "Nycolas Mendes Couto", "email": "nycolas.couto@betternow.com.br" },
+        { "nome": "Leonardo Fuoco", "email": "leonardo.fuoco@nttdata.com" },
+        { "nome": "Karen Nunes Oliveira", "email": "karen.nunes@betternow.com.br" },
+        { "nome": "Douglas Alves de Sousa", "email": "douglas.sousa@betternow.com.br" }
+      ]
+    },
+    "Parametrização ⓐ": {
+      "resumo": "Serviços Virtualizados & Parametrizações",
+      "SLA": "2 dias",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Eduardo dos Santos Pedro", "email": "eduardo.pedro@claro.com.br" },
+      "lider": { "nome": "Douglas Alves de Sousa", "email": "douglas.sousa@betternow.com.br" },
+      "membros": [
+        { "nome": "Isabella de Oliveira Pavanello", "email": "isabella.pavanello@betternow.com.br" },
+        { "nome": "Nycolas Mendes Couto", "email": "nycolas.couto@betternow.com.br" },
+        { "nome": "Leonardo Fuoco", "email": "leonardo.fuoco@nttdata.com" },
+        { "nome": "Karen Nunes Oliveira", "email": "karen.nunes@betternow.com.br" },
+        { "nome": "Douglas Alves de Sousa", "email": "douglas.sousa@betternow.com.br" }
+      ]
+    },
+    "Esteiras de microserviços ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Tatiana Fernandes Teles", "email": "Tatiana.Fernandes@claro.com.br" },
+      "gestao": { "nome": "Thiago Campanilli", "email": "thiago.campanilli@claro.com.br" },
+      "lider": { "nome": "Derick Willians Maciel Siqueira", "email": "derick.siqueira.terceiros@claro.com.br" },
+      "softwares": [
+        { "nome": "GIT", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "Othon Luis Ferreira Crespo", "email": "othon.crespo@sysmap.com.br" },
+        { "nome": "Yuri Nícolas Engelmann", "email": "yuri.engelmann@sysmap.com.br" },
+        { "nome": "Alessandro Carvalho Pessanha", "email": "alessandro.pessanha@sysmap.com.br" },
+      ]
+    },
+    "Replicas de microserviços ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Thiago Campanilli", "email": "thiago.campanilli@claro.com.br" },
+      "lider": { "nome": "Fabio Vieira", "email": "fabio.vieira@itshare.com.br" },
+      "softwares": [
+        { "nome": "Kubernets", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "" },
+      ],
+      "membros": [
+        { "nome": "Gabriela Martins", "email": "gabriela.martins@itshare.com.br" },
+        { "nome": "Rodolfo Silva", "email": "rodolfo.silvalima.terceiros@claro.com.br" }
+      ]
+    },
+    "Rancher ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Thiago Campanilli", "email": "thiago.campanilli@claro.com.br" },
+      "lider": { "nome": "Fabio Vieira", "email": "fabio.vieira@itshare.com.br" },
+      "membros": [
+        { "nome": "Rodolfo Silva", "email": "rodolfo.silvalima.terceiros@claro.com.br" }
+      ]
+    },
+    "NFCON ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Persio Luis Pacheco", "email": "persio.lpacheco@claro.com.br" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "RGC ⓟⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "SOLAR ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "REPLICAS SOLAR ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "Fabio Roberto Candido Lindolfo", "email": "fabio.lindolfo@claro.com.br" },
+      "gestao": { "nome": "Eduardo dos Santos Pedro", "email": "eduardo.pedro@claro.com.br" },
+      "lider": { "nome": "Thais Aparecida Franchi Costa", "email": "thais.costa@sysmap.com.br" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Automação ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "", "email": "" },
+      "gerente": { "nome": "", "email": "" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Móvel ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Perf/Aut DDP ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Carlos", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Device Form ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Certificação Móvel ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Willians", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Reforma NFCON ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Victor", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "RGC ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Carlos", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "FLEX / Pré ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Gustavo", "email": "" },
+      "lider": { "nome": "Silviane", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Móvel PJ ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Willians", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Móvel PF ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Douglas", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "SVC / E-sim Digital ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "João Sebastião da Costa Junior", "email": "" },
+      "gestao": { "nome": "Franciele", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Residencial ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "TDM ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Denise", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Certificação Residencial ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Marilia", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "HLE ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Katia", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Solar ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Denise", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "NFCON ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Ursula", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Residencial ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Tatiane", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Residencial TV ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Marilia", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Gates ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Danielle Pereira da Silva Souza", "email": "" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Octane ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Danielle Pereira da Silva Souza", "email": "" },
+      "gestao": { "nome": "Lucia", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "PRR ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Danielle Pereira da Silva Souza", "email": "" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Indicadores ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Danielle Pereira da Silva Souza", "email": "" },
+      "gestao": { "nome": "", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "Processo COE ⓐ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Danielle Pereira da Silva Souza", "email": "" },
+      "gestao": { "nome": "Judy", "email": "" },
+      "lider": { "nome": "", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    },
+    "SAP S/4 HANA ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Danielle Pereira da Silva Souza", "email": "" },
+      "gestao": { "nome": "Douglas", "email": "" },
+      "lider": { "nome": "Marcos", "email": "" },
+      "membros": [
+        { "nome": "", "email": "" }
+      ]
+    }
+  },
+  "Empresarial": {
+    "Empresarial ⓟ": {
+      "resumo": "",
+      "SLA": "",
+      "horas-contratadas": "",
+      "diretor": { "nome": "Cesar Augusto dos Santos", "email": "cesar.santos@claro.com.br" },
+      "gerente": { "nome": "Francis Douglas David", "email": "francis.david@claro.com.br" },
+      "coordenacao": { "nome": "Marcia Martins Tinoco", "email": "" },
+      "gestao": { "nome": "Maria Patricia", "email": "" },
+      "lider": { "nome": "Lucia", "email": "" },
+      "softwares": [
+        { "nome": "SGA-PLUS", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"aprovisionamento de produtos de internet e dados" },
+        { "nome": "SGA-DADOS", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"gestão de ativação - dados" },
+        { "nome": "SGA-VOZ", "versao": "", "tipo": "backend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"aprovisionamento de produtos de voz" },
+        { "nome": "GSI-DADOS", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"gestão de serviço integrada de dados" },
+        { "nome": "GSI-VOZ", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"gestão de serviço integrada - voz" },
+        { "nome": "GSI-BFN", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"gestão de serviço integrada - bfn" },
+        { "nome": "SGV", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"sistema gestao de vendas" },
+        { "nome": "LINCEPT", "versao": "", "tipo": "frontend", "backend": "", "ambiente": "", "responsavel": "", "descricao":"" },
+      ],
+      "membros": [
+        { "nome": "Jomar Jose Vila de Abreu", "email": "jomar.abreu@claro.com.br" }
+      ]
+    }
+  }
+};
+
+        function createPersonCard(person, role) {
+            if (!person.nome || person.nome === "") return '';
+            
+            return `
+                <div class="person-card">
+                    <div class="person-name">${person.nome}</div>
+                    <div class="person-email">
+                        ${person.email ? `<a href="mailto:${person.email}">${person.email}</a>` : 'Email não disponível'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function createSoftwareCard(software) {
+            return `
+                <div class="software-card">
+                    <div class="software-header">
+                        <div class="software-name">${software.nome}</div>
+                        ${software.versao ? `<div class="software-version">${software.versao}</div>` : ''}
+                    </div>
+                    <div class="software-details">
+                        ${software.ambiente ? `<div class="software-detail"><strong>Ambiente:</strong> ${software.ambiente}</div>` : ''}
+                        ${software.responsavel ? `<div class="software-detail"><strong>Responsável:</strong> ${software.responsavel}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function createTeamCard(area, teamName, teamData) {
+            let html = `
+                <div class="team-card" data-area="${area}">
+                    <div class="team-header">
+                        <div class="team-title">${teamName}</div>
+                        <div class="team-badge">${area}</div>
+                    </div>
+            `;
+
+            if (teamData.coordenacao && teamData.coordenacao.nome) {
+                html += `
+                    <div class="role-section">
+                        <div class="role-title">Coordenação</div>
+                        ${createPersonCard(teamData.coordenacao, 'coordenacao')}
+                    </div>
+                `;
+            }
+
+            if (teamData.gestao && teamData.gestao.nome) {
+                html += `
+                    <div class="role-section">
+                        <div class="role-title">Gestão</div>
+                        ${createPersonCard(teamData.gestao, 'gestao')}
+                    </div>
+                `;
+            }
+
+            if (teamData.lider && teamData.lider.nome) {
+                html += `
+                    <div class="role-section">
+                        <div class="role-title">Líder</div>
+                        ${createPersonCard(teamData.lider, 'lider')}
+                    </div>
+                `;
+            }
+
+            if (teamData.membros && teamData.membros.length > 0) {
+                const validMembers = teamData.membros.filter(m => m.nome && m.nome !== "");
+                if (validMembers.length > 0) {
+                    html += `
+                        <div class="role-section">
+                            <div class="role-title">Membros (${validMembers.length})</div>
+                            <div class="members-list">
+                                ${validMembers.map(m => createPersonCard(m, 'membro')).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            if (teamData.softwares && teamData.softwares.length > 0) {
+                const frontendCount = teamData.softwares.filter(s => s.tipo === 'frontend').length;
+                const backendCount = teamData.softwares.filter(s => s.tipo === 'backend').length;
+                
+                html += `
+                    <div class="role-section">
+                        <div class="role-title">
+                            <!--Softwares Atendidos (${teamData.softwares.length})-->
+                            Projetos Suportados (${teamData.softwares.length})
+                            <div class="role-subtitle">Frontend: ${frontendCount} | Backend: ${backendCount}</div>
+                        </div>
+                        <div class="members-list">
+                            ${teamData.softwares.map(s => createSoftwareCard(s)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        function renderTeams(filter = 'all', searchTerm = '') {
+            const container = document.getElementById('teamsContainer');
+            let html = '';
+
+            Object.keys(orgData).forEach(area => {
+                if (filter !== 'all' && filter !== area) return;
+
+                Object.keys(orgData[area]).forEach(teamName => {
+                    const teamCard = createTeamCard(area, teamName, orgData[area][teamName]);
+                    
+                    if (searchTerm) {
+                        if (teamCard.toLowerCase().includes(searchTerm.toLowerCase())) {
+                            html += teamCard;
+                        }
+                    } else {
+                        html += teamCard;
+                    }
+                });
+            });
+
+            if (html === '') {
+                container.innerHTML = '<div class="empty-state">Nenhum resultado encontrado</div>';
+            } else {
+                container.innerHTML = html;
+            }
+        }
+
+        // Event listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.getAttribute('data-filter');
+                const searchTerm = document.getElementById('searchInput').value;
+                renderTeams(filter, searchTerm);
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
+            renderTeams(activeFilter, e.target.value);
+        });
+
+        // Initial render
+        renderTeams();
+    </script>
+</body>
+</html>
