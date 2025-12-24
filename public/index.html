@@ -3,6 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Projeto de Autenticação - CORRIGIDO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .warning strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .file-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .file-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .file-item {
+            padding: 8px 12px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #555;
+            border-left: 3px solid #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            color: #004085;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Gerador de Projeto - CORRIGIDO</h1>
+        
+        <div class="warning">
+            <strong>⚠️ CORREÇÃO DO ERRO 401</strong>
+            O erro acontece porque a estrutura estava incorreta. Esta versão corrigida remove a pasta "public" e ajusta as configurações da Vercel.
+        </div>
+
+        <p>Este gerador criará todos os arquivos necessários para o projeto de autenticação funcionar corretamente na Vercel.</p>
+
+        <div class="file-list">
+            <h3>📁 Estrutura Corrigida:</h3>
+            <div class="file-item">📄 index.html (RAIZ)</div>
+            <div class="file-item">📄 package.json</div>
+            <div class="file-item">📄 vercel.json</div>
+            <div class="file-item">📄 api/_session.js</div>
+            <div class="file-item">📄 api/login.js</div>
+            <div class="file-item">📄 api/logout.js</div>
+            <div class="file-item">📄 api/check-session.js</div>
+        </div>
+
+        <button class="btn" onclick="downloadAllFiles()">⬇️ Baixar Todos os Arquivos Corrigidos</button>
+
+        <div id="status" style="display: none;"></div>
+
+        <div class="instructions">
+            <strong>📋 Estrutura de Pastas CORRETA:</strong>
+            <pre style="margin-top: 10px; background: white; padding: 10px; border-radius: 4px; overflow-x: auto;">
+auth-vercel/
+├── index.html          ← NA RAIZ!
+├── package.json
+├── vercel.json
+└── api/
+    ├── _session.js
+    ├── login.js
+    ├── logout.js
+    └── check-session.js
+            </pre>
+            <ol>
+                <li>Baixe todos os arquivos</li>
+                <li>Crie uma pasta <code>auth-vercel</code></li>
+                <li>Coloque <code>index.html</code>, <code>package.json</code> e <code>vercel.json</code> na RAIZ</li>
+                <li>Crie a pasta <code>api/</code> e coloque os arquivos JS dentro</li>
+                <li>Execute: <code>npm install</code></li>
+                <li>Execute: <code>vercel</code></li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const files = {
+            'index.html': `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Autenticação</title>
     <style>
         * {
@@ -164,13 +364,11 @@
 </head>
 <body>
     <div class="container">
-        <!-- Loading -->
         <div id="loadingScreen" class="loading">
             <div class="spinner"></div>
             <p style="margin-top: 16px; color: #666;">Verificando sessão...</p>
         </div>
 
-        <!-- Login -->
         <div id="loginScreen" class="hidden">
             <div class="logo">
                 <h1>Bem-vindo</h1>
@@ -199,7 +397,6 @@
             </form>
         </div>
 
-        <!-- Dashboard -->
         <div id="dashboardScreen" class="dashboard hidden">
             <div class="logo">
                 <h1>Dashboard</h1>
@@ -221,7 +418,7 @@
         function showMessage(elementId, text, type) {
             const el = document.getElementById(elementId);
             el.textContent = text;
-            el.className = `message ${type}`;
+            el.className = \`message \${type}\`;
             el.classList.remove('hidden');
         }
 
@@ -297,8 +494,199 @@
             }
         }
 
-        // Verifica sessão ao carregar
         window.addEventListener('load', checkSession);
+    </script>
+</body>
+</html>`,
+
+            'package.json': `{
+  "name": "auth-vercel",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "cookie": "^0.6.0"
+  }
+}`,
+
+            'vercel.json': `{
+  "cleanUrls": true
+}`,
+
+            'api/_session.js': `import cookie from 'cookie';
+
+const sessions = {};
+
+export function createSession(res, user) {
+  const id = Math.random().toString(36).substring(2) + 
+             Math.random().toString(36).substring(2);
+  
+  sessions[id] = { 
+    user, 
+    expires: Date.now() + 30 * 60 * 1000
+  };
+  
+  res.setHeader('Set-Cookie', cookie.serialize('SESSION', id, {
+    httpOnly: true,
+    path: '/',
+    maxAge: 30 * 60,
+    sameSite: 'lax'
+  }));
+  
+  return id;
+}
+
+export function getSession(req) {
+  const cookies = cookie.parse(req.headers.cookie || '');
+  const id = cookies.SESSION;
+  
+  if (!id || !sessions[id]) return null;
+  
+  if (sessions[id].expires < Date.now()) {
+    delete sessions[id];
+    return null;
+  }
+  
+  return sessions[id];
+}
+
+export function destroySession(req, res) {
+  const cookies = cookie.parse(req.headers.cookie || '');
+  const id = cookies.SESSION;
+  
+  if (id) {
+    delete sessions[id];
+  }
+  
+  res.setHeader('Set-Cookie', cookie.serialize('SESSION', '', {
+    path: '/',
+    maxAge: 0
+  }));
+}`,
+
+            'api/login.js': `import { createSession } from './_session.js';
+
+export default async function handler(req, res) {
+  // Configura CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  
+  const { user, pass } = req.body;
+  
+  if (user === 'admin' && pass === '123') {
+    createSession(res, user);
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Login realizado com sucesso',
+      user 
+    });
+  }
+  
+  return res.status(401).json({ 
+    success: false, 
+    message: 'Credenciais inválidas' 
+  });
+}`,
+
+            'api/logout.js': `import { destroySession } from './_session.js';
+
+export default async function handler(req, res) {
+  // Configura CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+  
+  destroySession(req, res);
+  
+  return res.status(200).json({ 
+    success: true, 
+    message: 'Logout realizado com sucesso' 
+  });
+}`,
+
+            'api/check-session.js': `import { getSession } from './_session.js';
+
+export default async function handler(req, res) {
+  // Configura CORS
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  const session = getSession(req);
+  
+  if (!session) {
+    return res.status(401).json({ 
+      authenticated: false 
+    });
+  }
+  
+  return res.status(200).json({ 
+    authenticated: true, 
+    user: session.user 
+  });
+}`
+        };
+
+        function downloadFile(filename, content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadAllFiles() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'alert success';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '📥 Iniciando download dos arquivos corrigidos...';
+
+            let count = 0;
+            const total = Object.keys(files).length;
+
+            Object.entries(files).forEach(([filename, content], index) => {
+                setTimeout(() => {
+                    downloadFile(filename, content);
+                    count++;
+                    
+                    statusDiv.innerHTML = `📥 Baixando: ${filename} (${count}/${total})`;
+                    
+                    if (count === total) {
+                        setTimeout(() => {
+                            statusDiv.innerHTML = '✅ Todos os arquivos corrigidos foram baixados! Reorganize conforme a estrutura mostrada acima.';
+                        }, 500);
+                    }
+                }, index * 300);
+            });
+        }
     </script>
 </body>
 </html>
