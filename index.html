@@ -117,11 +117,11 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username">Usuário</label>
-                    <input type="text" id="username" required>
+                    <input type="text" id="username" autocomplete="username" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Senha</label>
-                    <input type="password" id="password" required>
+                    <input type="password" id="password" autocomplete="current-password" required>
                 </div>
                 <button type="submit" class="btn" id="loginBtn">Entrar</button>
             </form>
@@ -155,16 +155,25 @@
         }
         async function checkSession() {
             try {
-                const res = await fetch('/api/check-session');
-                const data = await res.json();
-                if (data.authenticated) {
-                    document.getElementById('dashboardUser').textContent = data.user;
-                    showScreen('dashboardScreen');
-                } else {
-                    showScreen('loginScreen');
+                const res = await fetch('/api/check-session', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.authenticated) {
+                        document.getElementById('dashboardUser').textContent = data.user;
+                        showScreen('dashboardScreen');
+                        return;
+                    }
                 }
+                
+                // Se não houver sessão ou erro, mostra login
+                showScreen('loginScreen');
             } catch (error) {
-                console.error('Erro ao verificar sessão:', error);
+                // Erro de rede ou servidor - mostra login
+                console.log('Nenhuma sessão ativa, redirecionando para login');
                 showScreen('loginScreen');
             }
         }
@@ -179,6 +188,7 @@
                 const res = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ user, pass })
                 });
                 const data = await res.json();
@@ -201,7 +211,10 @@
         });
         async function handleLogout() {
             try {
-                await fetch('/api/logout', { method: 'POST' });
+                await fetch('/api/logout', { 
+                    method: 'POST',
+                    credentials: 'include'
+                });
                 showScreen('loginScreen');
                 showMessage('loginMessage', 'Logout realizado com sucesso', 'success');
                 document.getElementById('loginForm').reset();
