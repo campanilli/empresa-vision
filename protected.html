@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Área Protegida</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.6);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      color: #38bdf8;
+    }
+
+    p {
+      color: #cbd5f5;
+      margin-bottom: 24px;
+    }
+
+    .status {
+      margin: 16px 0;
+      font-weight: bold;
+      color: #22c55e;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #ef4444;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    .loading {
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="loading">
+    <p class="loading">🔐 Verificando autenticação...</p>
+  </div>
+
+  <div class="card" id="content" style="display:none;">
+    <h1>Área Protegida</h1>
+    <p>Você acessou uma tela restrita.</p>
+
+    <div class="status">
+      Usuário autenticado: <span id="user"></span>
+    </div>
+
+    <button onclick="logout()">Sair</button>
+  </div>
+
+  <script>
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/check-session', {
+          credentials: 'include'
+        });
+
+        if (!res.ok) {
+          window.location.href = '/';
+          return;
+        }
+
+        const data = await res.json();
+
+        if (!data.authenticated) {
+          window.location.href = '/';
+          return;
+        }
+
+        document.getElementById('user').textContent = data.user;
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+
+      } catch (err) {
+        window.location.href = '/';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      window.location.href = '/';
+    }
+
+    window.addEventListener('load', checkAuth);
+  </script>
+
+</body>
+</html>
