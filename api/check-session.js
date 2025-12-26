@@ -1,25 +1,21 @@
-import { getSession } from './_session.js';
+import jwt from 'jsonwebtoken';
+import cookie from 'cookie';
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+  const cookies = cookie.parse(req.headers.cookie || '');
+  const token = cookies.AUTH;
+
+  if (!token) {
+    return res.status(401).json({ authenticated: false });
   }
-  
-  const session = getSession(req);
-  
-  if (!session) {
-    return res.status(401).json({ 
-      authenticated: false 
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return res.json({
+      authenticated: true,
+      user: decoded.user
     });
+  } catch {
+    return res.status(401).json({ authenticated: false });
   }
-  
-  return res.status(200).json({ 
-    authenticated: true, 
-    user: session.user 
-  });
 }
