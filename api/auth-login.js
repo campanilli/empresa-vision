@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 const USER = 'admin';
 
 // HASH gerado previamente
-const PASSWORD_HASH = '$2a$12$K6z1s9Y5ZpZ4e5X7xqz3XuGZk0n1xP0z3E0Zz4pL8pV1yN1R7S9tO';
+const PASSWORD_HASH = '$2a$12$2UlD1brv4CiQWT7STHcM4OZmxqsKh.oztMjzx4e/1p/HdTE7fRBdm';
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
