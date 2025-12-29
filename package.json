@@ -1,8 +1,9 @@
 {
-  "name": "auth-vercel",
+  "name": "auth-vercel-jwt",
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "cookie": "^0.6.0"
+    "cookie": "^0.6.0",
+    "jsonwebtoken": "^9.0.2"
   }
 }
