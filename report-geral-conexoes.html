@@ -488,7 +488,8 @@
             table.style.display = 'none';
 
             try {
-                const response = await fetch('http://localhost:8080/api/weblogic-datasources');
+                //const response = await fetch('http://localhost:8080/api/weblogic-datasources');
+                const response = await fetch('/api/weblogic-datasources');
                 if (!response.ok) throw new Error('Erro ao carregar dados');
                 
                 allData = await response.json();
