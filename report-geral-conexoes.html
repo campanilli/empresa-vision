@@ -742,6 +742,19 @@
 
         // Carrega dados ao iniciar
         loadData();
+
+        async function checkAuthPage() {
+          const res = await fetch('/api/auth-check', {
+            credentials: 'include'
+          });
+
+          if (!res.ok) {
+              window.location.href = '/';
+          }
+      }
+
+      checkAuthPage();
+
     </script>
 </body>
 </html>
