@@ -1,25 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import jwt from 'jsonwebtoken';
-import cookie from 'cookie';
 
 export default function handler(req, res) {
-  // 1️⃣ Lê cookie
-  const cookies = cookie.parse(req.headers.cookie || '');
-  const token = cookies.AUTH;
-
-  if (!token) {
-    return res.status(401).json({ error: 'Não autenticado' });
-  }
-
-  // 2️⃣ Valida JWT
-  try {
-    jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return res.status(401).json({ error: 'Token inválido ou expirado' });
-  }
-
-  // 3️⃣ Se autenticado, retorna os dados
   try {
     const filePath = path.join(
       process.cwd(),
@@ -39,7 +21,8 @@ export default function handler(req, res) {
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({
-      error: 'Erro ao processar weblogic-datasources.json'
+      error: 'Erro ao processar weblogic-datasources.json',
+      details: err.message
     });
   }
 }

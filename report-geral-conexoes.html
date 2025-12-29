@@ -471,19 +471,6 @@
     </div>
 
     <script>
-
-      async function checkAuthPage() {
-        const res = await fetch('/api/auth-check', {
-          credentials: 'include'
-        });
-
-        if (!res.ok) {
-          window.location.href = '/';
-        }
-      }
-
-      checkAuthPage();
-
         let allData = [];
         let filteredData = [];
         let currentPage = 1;
