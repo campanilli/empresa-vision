@@ -9,10 +9,7 @@ export default function handler(req, res) {
   const { user, pass } = req.body;
 
   if (user !== 'admin' || pass !== '123') {
-    return res.status(401).json({
-      success: false,
-      message: 'Credenciais inválidas'
-    });
+    return res.status(401).json({ success: false });
   }
 
   const token = jwt.sign(
@@ -23,14 +20,11 @@ export default function handler(req, res) {
 
   res.setHeader('Set-Cookie', cookie.serialize('AUTH', token, {
     httpOnly: true,
-    secure: true,          // HTTPS (Vercel)
+    secure: true,
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 30
   }));
 
-  return res.json({
-    success: true,
-    user
-  });
+  res.json({ success: true, user });
 }

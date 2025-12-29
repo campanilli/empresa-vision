@@ -155,7 +155,7 @@
         }
         async function checkSession() {
             try {
-                const res = await fetch('/api/check-session', {
+                const res = await fetch('/api/auth-check', {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -185,7 +185,7 @@
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             try {
-                const res = await fetch('/api/login', {
+                const res = await fetch('/api/auth-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -211,7 +211,7 @@
         });
         async function handleLogout() {
             try {
-                await fetch('/api/logout', { 
+                await fetch('/api/auth-logout', { 
                     method: 'POST',
                     credentials: 'include'
                 });

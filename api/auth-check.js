@@ -11,12 +11,10 @@ export default function handler(req, res) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
     return res.json({
       authenticated: true,
       user: decoded.user
     });
-
   } catch {
     return res.status(401).json({ authenticated: false });
   }
