@@ -8,7 +8,7 @@ export default function handler(req, res) {
 
   const { user, pass } = req.body;
 
-  if (user !== 'admin' || pass !== '123') {
+  if (user !== 'admin' || pass !== 'N7@Rk9!vL#2Qe$M') {
     return res.status(401).json({ success: false });
   }
 
