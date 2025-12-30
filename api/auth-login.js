@@ -1,6 +1,13 @@
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
 
+/**
+ * Decodifica Base64
+ */
+function decodeBase64(encoded) {
+  return Buffer.from(encoded, 'base64').toString('utf-8');
+}
+
 export default function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).end();
@@ -8,7 +15,10 @@ export default function handler(req, res) {
 
   const { user, pass } = req.body;
 
-  if (user !== 'admin' || pass !== 'N7@Rk9!vL#2Qe$M') {
+  // senha real obtida a partir do Base64
+  const realPassword = decodeBase64(process.env.ADMIN_PASSWORD_ENC);
+
+  if (user !== 'admin' || pass !== realPassword) {
     return res.status(401).json({ success: false });
   }
 
