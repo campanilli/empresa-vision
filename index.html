@@ -518,6 +518,17 @@
     </div>
 
     <script>
+
+      async function checkAuthPage() {
+        const res = await fetch('/api/auth-check', {
+          credentials: 'include'
+        });
+
+        if (!res.ok) {
+          window.location.href = '/';
+        }
+      }
+
         function abrirLink(url) {
             window.open(url, '_self');
         }
