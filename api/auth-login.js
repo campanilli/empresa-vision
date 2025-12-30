@@ -1,6 +1,11 @@
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
 
+function decodeBase64(encoded) {
+  if (!encoded) return null;
+  return Buffer.from(encoded.trim(), 'base64').toString('utf-8');
+}
+
 export default function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).end();
@@ -8,7 +13,14 @@ export default function handler(req, res) {
 
   const { user, pass } = req.body;
 
-  if (user !== 'admin' || pass !== 'N7@Rk9!vL#2Qe$M') {
+  const realPassword = decodeBase64(process.env.ADMIN_PASSWORD_ENC);
+
+  // proteção extra para debug
+  if (!realPassword) {
+    return res.status(500).json({ error: 'Senha não configurada no ambiente' });
+  }
+
+  if (user !== 'admin' || pass !== realPassword) {
     return res.status(401).json({ success: false });
   }
 
