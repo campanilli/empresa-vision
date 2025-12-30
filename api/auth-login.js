@@ -1,43 +1,41 @@
-import jwt from 'jsonwebtoken';
-import cookie from 'cookie';
 import bcrypt from 'bcryptjs';
 
+/**
+ * Handler de login
+ * Espera receber: { password }
+ */
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).end();
+  try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Método não permitido' });
+    }
+
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ error: 'Senha não informada' });
+    }
+
+    // Hash armazenado na Vercel (Environment Variable)
+    const storedHash = process.env.ADMIN_PASSWORD_HASH;
+
+    if (!storedHash) {
+      return res.status(500).json({
+        error: 'ADMIN_PASSWORD_HASH não configurado no ambiente'
+      });
+    }
+
+    // Comparação bcrypt
+    const isValid = await bcrypt.compare(password, storedHash);
+
+    if (!isValid) {
+      return res.status(401).json({ error: 'Credenciais inválidas' });
+    }
+
+    return res.status(200).json({ success: true });
+
+  } catch (err) {
+    console.error('Erro no login:', err);
+    return res.status(500).json({ error: 'Erro interno no servidor' });
   }
-
-  const { user, pass } = req.body;
-
-  const hash = process.env.ADMIN_PASSWORD_HASH;
-
-  if (!hash) {
-    return res.status(500).json({ error: 'Senha não configurada no ambiente' });
-  }
-
-  if (user !== 'admin') {
-    return res.status(401).json({ success: false });
-  }
-
-  const isValid = await bcrypt.compare(pass, hash);
-
-  if (!isValid) {
-    return res.status(401).json({ success: false });
-  }
-
-  const token = jwt.sign(
-    { user },
-    process.env.JWT_SECRET,
-    { expiresIn: '30m' }
-  );
-
-  res.setHeader('Set-Cookie', cookie.serialize('AUTH', token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 60 * 30
-  }));
-
-  res.json({ success: true, user });
 }
