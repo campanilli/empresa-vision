@@ -1,26 +1,27 @@
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
+import bcrypt from 'bcryptjs';
 
-function decodeBase64(encoded) {
-  if (!encoded) return null;
-  return Buffer.from(encoded.trim(), 'base64').toString('utf-8');
-}
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).end();
   }
 
   const { user, pass } = req.body;
 
-  const realPassword = decodeBase64(process.env.ADMIN_PASSWORD_ENC);
+  const hash = process.env.ADMIN_PASSWORD_HASH;
 
-  // proteção extra para debug
-  if (!realPassword) {
+  if (!hash) {
     return res.status(500).json({ error: 'Senha não configurada no ambiente' });
   }
 
-  if (user !== 'admin' || pass !== realPassword) {
+  if (user !== 'admin') {
+    return res.status(401).json({ success: false });
+  }
+
+  const isValid = await bcrypt.compare(pass, hash);
+
+  if (!isValid) {
     return res.status(401).json({ success: false });
   }
 
