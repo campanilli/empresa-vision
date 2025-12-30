@@ -3,214 +3,563 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Autenticação</title>
+    <title>Dashboard de Gestão de TI</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            overflow-x: hidden;
+            overflow-y: auto;
             min-height: 100vh;
+        }
+
+        .start-screen {
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 2px;
+            padding: 2px;
+        }
+
+        .tile {
+            cursor: pointer;
+            transition: all 0.15s ease;
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-end;
+            color: white;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            border: none;
+        }
+
+        .tile:hover {
+            filter: brightness(1.15);
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .tile:active {
+            transform: scale(0.95);
+        }
+
+        /* Grid positioning - estilo Windows 8/10 */
+        .tile-large {
+            grid-column: span 2;
+            grid-row: span 2;
+            position: relative;
+        }
+
+        .tile-wide {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        .tile-small {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        .tile-tall {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        /* Cores Windows 8/10 */
+        .blue {
+            background: #0078d4;
+        }
+
+        .green {
+            background: #107c10;
+        }
+
+        .teal {
+            background: #008575;
+        }
+
+        .purple {
+            background: #881798;
+        }
+
+        .orange {
+            background: #ff8c00;
+        }
+
+        .red {
+            background: #e81123;
+        }
+
+        .yellow {
+            background: #ffb900;
+        }
+
+        .cyan {
+            background: #00b7c3;
+        }
+
+        .darkblue {
+            background: #0063b1;
+        }
+
+        .tile-icon {
+            font-size: 3.5em;
+            margin-bottom: auto;
+            opacity: 1;
+            width: 1em;
+            height: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tile-large .tile-icon {
+            font-size: 6em;
+        }
+
+        .tile-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: white !important;
+            stroke: white;
+        }
+
+        .tile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .tile-content {
+            width: 100%;
+        }
+
+        .tile-title {
+            font-size: 1.1em;
+            font-weight: 400;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tile-large .tile-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .tile-status {
+            font-size: 2.5em;
+            font-weight: 300;
+            line-height: 1;
+        }
+
+        .tile-large .tile-status {
+            font-size: 4em;
+        }
+
+        .tile-subtitle {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 3px;
+        }
+
+        .tile-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 2px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .tile-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .info-number {
+            font-weight: 600;
+            min-width: 20px;
+            text-align: right;
+        }
+
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: white;
+        }
+
+        .info-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Efeito de destaque */
+        .tile::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0);
+            transition: background 0.3s ease;
+            pointer-events: none;
+        }
+
+        .tile:hover::after {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 1200px) {
+            .start-screen {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .start-screen {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: auto;
+                gap: 4px;
+                padding: 4px;
+            }
+
+            .tile {
+                padding: 15px;
+                min-height: 180px;
+            }
+
+            .tile-icon {
+                font-size: 2.5em;
+            }
+
+            .tile-large .tile-icon {
+                font-size: 4em;
+            }
+            
+            .tile-large {
+                min-height: 280px;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
         }
-        .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
+
+        .modal.show {
+            display: flex;
         }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { color: #667eea; font-size: 28px; margin-bottom: 8px; }
-        .logo p { color: #666; font-size: 14px; }
-        .form-group { margin-bottom: 20px; }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.3s;
+
+        .modal-content {
+            background: #2d2d30;
+            padding: 0;
+            border-radius: 0;
+            text-align: left;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid #3e3e42;
+            animation: slideUp 0.3s ease;
         }
-        input:focus { outline: none; border-color: #667eea; }
-        .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: #007acc;
+            padding: 20px 25px;
+            color: white;
+            font-size: 1.3em;
+            font-weight: 400;
+        }
+
+        .modal-body {
+            padding: 25px;
+            color: #cccccc;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: 15px 25px;
+            background: #252526;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #3e3e42;
+        }
+
+        .modal-button {
+            background: #007acc;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 10px 30px;
+            font-size: 1em;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: background 0.2s ease;
         }
-        .btn:hover { transform: translateY(-2px); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn.secondary { background: #f0f0f0; color: #333; margin-top: 12px; }
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
+
+        .modal-button:hover {
+            background: #005a9e;
         }
-        .message.success { background: #d4edda; color: #155724; }
-        .message.error { background: #f8d7da; color: #721c24; }
-        .hidden { display: none; }
-        .dashboard { text-align: center; }
-        .user-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        .loading { text-align: center; padding: 20px; }
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .modal-button:active {
+            background: #004578;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="loadingScreen" class="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 16px; color: #666;">Verificando sessão...</p>
-        </div>
-        <div id="loginScreen" class="hidden">
-            <div class="logo">
-                <h1>Bem-vindo</h1>
-                <p>Faça login para continuar</p>
+    <div class="start-screen">
+        <!-- Infraestrutura - Large Tile -->
+        <div class="tile tile-large blue" onclick="abrirLink('http://clr00n001323894:8080/monitoring-servers.html')">
+            <div class="tile-badge">ONLINE</div>
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM20 3H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                </svg>
             </div>
-            <div id="loginMessage" class="message hidden"></div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Usuário</label>
-                    <input type="text" id="username" autocomplete="username" required>
+            <div class="tile-content">
+                <div class="tile-title">Infraestrutura</div>
+                <div class="tile-status">12</div>
+                <div class="tile-subtitle">servidores ativos</div>
+            </div>
+            <div class="tile-info">
+                <div class="info-item">
+                    <span class="info-number">7</span>
+                    <div class="info-icon">
+                        <img src="https://cdn.simpleicons.org/linux/white" alt="Linux" width="20" height="20">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" autocomplete="current-password" required>
+                <div class="info-item">
+                    <span class="info-number">5</span>
+                    <div class="info-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="white">
+                            <path d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"/>
+                        </svg>
+                    </div>
                 </div>
-                <button type="submit" class="btn" id="loginBtn">Entrar</button>
-            </form>
+            </div>
         </div>
-        <div id="dashboardScreen" class="dashboard hidden">
-            <div class="logo">
-                <h1>Dashboard</h1>
-                <p>Você está autenticado!</p>
+
+        <!-- Banco de Dados -->
+        <div class="tile tile-small green" onclick="abrirLink('http://clr00n001323894:8080/monitoring-bancos.html')">
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 3C7.58 3 4 4.79 4 7s3.58 4 8 4 8-1.79 8-4-3.58-4-8-4zm8 6c0 2.21-3.58 4-8 4s-8-1.79-8-4v3c0 2.21 3.58 4 8 4s8-1.79 8-4V9zm0 5c0 2.21-3.58 4-8 4s-8-1.79-8-4v3c0 2.21 3.58 4 8 4s8-1.79 8-4v-3z"/>
+                </svg>
             </div>
-            <div class="user-info">
-                <p><strong>Usuário:</strong> <span id="dashboardUser"></span></p>
-                <p style="margin-top: 8px;"><strong>Status:</strong> 
-                    <span style="color: #28a745;">● Online</span>
-                </p>
+            <div class="tile-content">
+                <div class="tile-title">Banco de Dados</div>
+                <div class="tile-status">5</div>
             </div>
-            <button class="btn secondary" onclick="handleLogout()">Sair</button>
+        </div>
+
+        <!-- Aplicações -->
+        <div class="tile tile-small teal" onclick="abrirLink('http://clr00n001323894:8080/monitoring-apps.html')">
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z"/>
+                </svg>
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">Aplicações</div>
+                <div class="tile-status">24</div>
+            </div>
+        </div>
+
+        <!-- Relatório Técnico -->
+        <div class="tile tile-wide purple" onclick="abrirLink('http://clr00n001323894:8080/report-mensal-apps.html')">
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">Relatório Técnico</div>
+                <div class="tile-subtitle">Análises e métricas de performance</div>
+            </div>
+        </div>
+
+        <!-- Relatório Gerencial -->
+        <div class="tile tile-wide orange" onclick="abrirLink('http://clr00n001323894:8080/dashboard-gerencial-ambientes.html')">
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                </svg>
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">Relatório Gerencial</div>
+                <div class="tile-subtitle">Dashboards executivos</div>
+            </div>
+        </div>
+
+        <!-- Monitoramento -->
+        <!-- <div class="tile tile-small red" onclick="abrirModulo('Monitoramento', '⚠️')"> -->
+        <div class="tile tile-small red" onclick="abrirLink('http://clr00n001323894:8080/monitoring.html')">
+            <div class="tile-badge">3</div>
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">Alertas</div>
+            </div>
+        </div>
+
+        <!-- Configurações -->
+        <!-- <div class="tile tile-small blue" onclick="abrirModulo('Configurações', '⚙️')"> -->
+        <div class="tile tile-small blue" onclick="abrirLink('http://clr00n001323894:8080/documents.html')">
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                </svg>
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">Configurações</div>
+            </div>
+        </div>
+
+        <!-- API / Integrações -->
+        <div class="tile tile-small yellow" onclick="abrirLink('http://clr00n001323894:8080/monitoring-services.html')">
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                    <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/>
+                </svg>
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">API</div>
+            </div>
+        </div>
+
+        <!-- Microserviços / Docker -->
+        <div class="tile tile-small cyan" onclick="abrirLink('http://clr00n001323894:8080/monitoring-rancher.html')">
+            <div class="tile-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="white">
+                    <path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/>
+                </svg>
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">Microserviços</div>
+            </div>
+        </div>
+
+        <!-- Rancher -->
+        <div class="tile tile-small darkblue" onclick="abrirLink('http://clr00n001323894:8080/monitoring-rancher.html')">
+            <div class="tile-icon">
+                <img src="https://cdn.simpleicons.org/rancher/white" alt="Rancher" width="48" height="48">
+            </div>
+            <div class="tile-content">
+                <div class="tile-title">Rancher</div>
+            </div>
         </div>
     </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle"></div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="fecharModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function showMessage(elementId, text, type) {
-            const el = document.getElementById(elementId);
-            el.textContent = text;
-            el.className = `message ${type}`;
-            el.classList.remove('hidden');
+        function abrirLink(url) {
+            window.open(url, '_self');
         }
-        function showScreen(screenId) {
-            ['loadingScreen', 'loginScreen', 'dashboardScreen'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(screenId).classList.remove('hidden');
+
+        function abrirModulo(modulo, icone) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const message = document.getElementById('modalMessage');
+
+            const mensagens = {
+                'Infraestrutura': 'Gerenciamento completo de servidores, virtualização, rede e storage. Visualize o status de todos os recursos de infraestrutura em tempo real.',
+                'Banco de Dados': 'Monitore todas as instâncias de banco de dados, queries lentas, uso de recursos e backups automatizados.',
+                'Aplicações': 'Dashboard centralizado de todas as aplicações em produção, com status de saúde, logs e métricas de uso.',
+                'Relatório Técnico': 'Relatórios detalhados com análises técnicas, SLA, incidentes resolvidos e métricas de performance do sistema.',
+                'Relatório Gerencial': 'Visão executiva com KPIs, custos de infraestrutura, disponibilidade e análises estratégicas.',
+                'Monitoramento': 'Central de alertas e notificações do sistema. Visualize e gerencie todos os avisos críticos.',
+                'Configurações': 'Configurações do sistema, preferências de usuário e administração de acessos.',
+                'API / Integrações': 'Gerencie e monitore todas as APIs e integrações com sistemas externos. Visualize logs, tráfego e performance das APIs.',
+                'Microserviços': 'Painel de controle de containers Docker e microserviços. Monitore status, recursos e logs dos containers em tempo real.'
+            };
+
+            title.textContent = icone + ' ' + modulo;
+            message.textContent = mensagens[modulo];
+            modal.classList.add('show');
         }
-        async function checkSession() {
-            try {
-                const res = await fetch('/api/auth-check', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.authenticated) {
-                        document.getElementById('dashboardUser').textContent = data.user;
-                        showScreen('dashboardScreen');
-                        return;
-                    }
-                }
-                
-                // Se não houver sessão ou erro, mostra login
-                showScreen('loginScreen');
-            } catch (error) {
-                // Erro de rede ou servidor - mostra login
-                console.log('Nenhuma sessão ativa, redirecionando para login');
-                showScreen('loginScreen');
-            }
+
+        function fecharModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('show');
         }
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            btn.disabled = true;
-            btn.textContent = 'Entrando...';
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            try {
-                const res = await fetch('/api/auth-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ user, pass })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showMessage('loginMessage', data.message, 'success');
-                    setTimeout(() => {
-                        document.getElementById('dashboardUser').textContent = data.user;
-                        showScreen('dashboardScreen');
-                    }, 500);
-                } else {
-                    showMessage('loginMessage', data.message, 'error');
-                    btn.disabled = false;
-                    btn.textContent = 'Entrar';
-                }
-            } catch (error) {
-                showMessage('loginMessage', 'Erro ao fazer login', 'error');
-                btn.disabled = false;
-                btn.textContent = 'Entrar';
+
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModal();
             }
         });
-        async function handleLogout() {
-            try {
-                await fetch('/api/auth-logout', { 
-                    method: 'POST',
-                    credentials: 'include'
-                });
-                showScreen('loginScreen');
-                showMessage('loginMessage', 'Logout realizado com sucesso', 'success');
-                document.getElementById('loginForm').reset();
-            } catch (error) {
-                console.error('Erro ao fazer logout:', error);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                fecharModal();
             }
-        }
-        window.addEventListener('load', checkSession);
+        });
     </script>
 </body>
 </html>
