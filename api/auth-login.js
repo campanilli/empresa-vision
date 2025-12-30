@@ -1,41 +1,42 @@
-import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import cookie from 'cookie';
 
-/**
- * Handler de login
- * Espera receber: { password }
- */
-export default async function handler(req, res) {
-  try {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Método não permitido' });
-    }
+function decodeBase64(encoded) {
+  if (!encoded) return null;
+  return Buffer.from(encoded.trim(), 'base64').toString('utf-8');
+}
 
-    const { password } = req.body;
-
-    if (!password) {
-      return res.status(400).json({ error: 'Senha não informada' });
-    }
-
-    // Hash armazenado na Vercel (Environment Variable)
-    const storedHash = process.env.ADMIN_PASSWORD_HASH;
-
-    if (!storedHash) {
-      return res.status(500).json({
-        error: 'ADMIN_PASSWORD_HASH não configurado no ambiente'
-      });
-    }
-
-    // Comparação bcrypt
-    const isValid = await bcrypt.compare(password, storedHash);
-
-    if (!isValid) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
-    }
-
-    return res.status(200).json({ success: true });
-
-  } catch (err) {
-    console.error('Erro no login:', err);
-    return res.status(500).json({ error: 'Erro interno no servidor' });
+export default function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).end();
   }
+
+  const { user, pass } = req.body;
+
+  const realPassword = decodeBase64(process.env.ADMIN_PASSWORD_ENC);
+
+  // proteção extra para debug
+  if (!realPassword) {
+    return res.status(500).json({ error: 'Senha não configurada no ambiente' });
+  }
+
+  if (user !== 'admin' || pass !== realPassword) {
+    return res.status(401).json({ success: false });
+  }
+
+  const token = jwt.sign(
+    { user },
+    process.env.JWT_SECRET,
+    { expiresIn: '30m' }
+  );
+
+  res.setHeader('Set-Cookie', cookie.serialize('AUTH', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 30
+  }));
+
+  res.json({ success: true, user });
 }
