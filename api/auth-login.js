@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const cookie = require('cookie');
-const bcrypt = require('bcryptjs');
+import { verify } from '@node-rs/bcrypt';
+import jwt from 'jsonwebtoken';
+import cookie from 'cookie';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   console.log('=== AUTH LOGIN DEBUG ===');
   console.log('Method:', req.method);
   
@@ -52,9 +52,9 @@ module.exports = async function handler(req, res) {
 
   try {
     // Compara a senha fornecida com o hash bcrypt armazenado
-    console.log('Iniciando bcrypt.compare...');
-    const isPasswordValid = await bcrypt.compare(pass, process.env.ADMIN_PASSWORD_HASH);
-    console.log('Resultado bcrypt.compare:', isPasswordValid);
+    console.log('Iniciando verify...');
+    const isPasswordValid = await verify(pass, process.env.ADMIN_PASSWORD_HASH);
+    console.log('Resultado verify:', isPasswordValid);
 
     if (!isPasswordValid) {
       console.log('❌ Senha incorreta');
@@ -100,4 +100,4 @@ module.exports = async function handler(req, res) {
       message: 'Erro ao processar autenticação: ' + error.message 
     });
   }
-};
+}
