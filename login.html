@@ -181,10 +181,10 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showMessage('loginMessage', data.message, 'success');
+                    showMessage('loginMessage', 'Login realizado com sucesso', 'success');
+
                     setTimeout(() => {
-                        document.getElementById('dashboardUser').textContent = data.user;
-                        showScreen('dashboardScreen');
+                        window.location.href = '/panel-general.html';
                     }, 500);
                 } else {
                     showMessage('loginMessage', data.message, 'error');
