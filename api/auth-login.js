@@ -1,24 +1,13 @@
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
-import crypto from 'crypto';
-
-// Função para criar hash SHA-256 com salt
-function hashPassword(password, salt) {
-  return crypto
-    .createHash('sha256')
-    .update(password + salt)
-    .digest('hex');
-}
-
-// Função para verificar senha
-function verifyPassword(password, storedHash, salt) {
-  const hash = hashPassword(password, salt);
-  return hash === storedHash;
-}
+import bcrypt from 'bcryptjs';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).end();
+    return res.status(405).json({ 
+      success: false, 
+      message: 'Método não permitido' 
+    });
   }
 
   const { user, pass } = req.body;
@@ -33,6 +22,7 @@ export default async function handler(req, res) {
 
   // Verifica se as variáveis de ambiente estão configuradas
   if (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD_HASH) {
+    console.error('Variáveis de ambiente não configuradas');
     return res.status(500).json({ 
       success: false, 
       message: 'Configuração do servidor incompleta' 
@@ -48,12 +38,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Usa o JWT_SECRET como salt
-    const isPasswordValid = verifyPassword(
-      pass, 
-      process.env.ADMIN_PASSWORD_HASH, 
-      process.env.JWT_SECRET
-    );
+    // Compara a senha fornecida com o hash bcrypt armazenado
+    const isPasswordValid = await bcrypt.compare(pass, process.env.ADMIN_PASSWORD_HASH);
 
     if (!isPasswordValid) {
       return res.status(401).json({ 
@@ -64,12 +50,12 @@ export default async function handler(req, res) {
 
     // Gera o token JWT
     const token = jwt.sign(
-      { user },
+      { user, timestamp: Date.now() },
       process.env.JWT_SECRET,
       { expiresIn: '30m' }
     );
 
-    // Define o cookie
+    // Define o cookie com configurações seguras
     res.setHeader('Set-Cookie', cookie.serialize('AUTH', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -78,7 +64,10 @@ export default async function handler(req, res) {
       maxAge: 60 * 30 // 30 minutos
     }));
 
-    return res.json({ success: true, user });
+    return res.json({ 
+      success: true, 
+      user 
+    });
 
   } catch (error) {
     console.error('Erro na autenticação:', error);
