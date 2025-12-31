@@ -1,6 +1,20 @@
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
-import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+
+// Função para criar hash SHA-256 com salt
+function hashPassword(password, salt) {
+  return crypto
+    .createHash('sha256')
+    .update(password + salt)
+    .digest('hex');
+}
+
+// Função para verificar senha
+function verifyPassword(password, storedHash, salt) {
+  const hash = hashPassword(password, salt);
+  return hash === storedHash;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -34,8 +48,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Compara a senha fornecida com o hash armazenado
-    const isPasswordValid = await bcrypt.compare(pass, process.env.ADMIN_PASSWORD_HASH);
+    // Usa o JWT_SECRET como salt
+    const isPasswordValid = verifyPassword(
+      pass, 
+      process.env.ADMIN_PASSWORD_HASH, 
+      process.env.JWT_SECRET
+    );
 
     if (!isPasswordValid) {
       return res.status(401).json({ 
