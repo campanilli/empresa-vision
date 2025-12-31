@@ -520,14 +520,21 @@
     <script>
 
       async function checkAuthPage() {
-        const res = await fetch('/api/auth-check', {
-          credentials: 'include'
-        });
+        try {
+          const res = await fetch('/api/auth-check', {
+            credentials: 'include'
+          });
 
-        if (!res.ok) {
-          window.location.href = '/';
+          if (!res.ok) {
+            window.location.href = '/login.html';
+          }
+        } catch (err) {
+          // Erro de rede ou API indisponível
+          window.location.href = '/login.html';
         }
       }
+
+      window.addEventListener('DOMContentLoaded', checkAuthPage);
 
         function abrirLink(url) {
             window.open(url, '_self');
