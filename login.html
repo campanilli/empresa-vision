@@ -157,8 +157,10 @@
                     }
                 }
                 
+                // Se não houver sessão ou erro, mostra login
                 showScreen('loginScreen');
             } catch (error) {
+                // Erro de rede ou servidor - mostra login
                 console.log('Nenhuma sessão ativa, redirecionando para login');
                 showScreen('loginScreen');
             }
@@ -180,16 +182,17 @@
                 const data = await res.json();
                 if (data.success) {
                     showMessage('loginMessage', 'Login realizado com sucesso', 'success');
+
                     setTimeout(() => {
                         window.location.href = '/panel-general.html';
                     }, 500);
                 } else {
-                    showMessage('loginMessage', data.message || 'Usuário ou senha incorretos', 'error');
+                    showMessage('loginMessage', data.message, 'error');
                     btn.disabled = false;
                     btn.textContent = 'Entrar';
                 }
             } catch (error) {
-                showMessage('loginMessage', 'Erro ao fazer login. Tente novamente.', 'error');
+                showMessage('loginMessage', 'Erro ao fazer login', 'error');
                 btn.disabled = false;
                 btn.textContent = 'Entrar';
             }
