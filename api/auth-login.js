@@ -1,8 +1,8 @@
-import jwt from 'jsonwebtoken';
-import cookie from 'cookie';
-import bcrypt from 'bcryptjs';
+const jwt = require('jsonwebtoken');
+const cookie = require('cookie');
+const bcrypt = require('bcryptjs');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   console.log('=== AUTH LOGIN DEBUG ===');
   console.log('Method:', req.method);
   
@@ -94,11 +94,10 @@ export default async function handler(req, res) {
     console.error('❌ Erro na autenticação:', error);
     console.error('Tipo de erro:', error.name);
     console.error('Mensagem:', error.message);
-    console.error('Stack:', error.stack);
     
     return res.status(500).json({ 
       success: false, 
       message: 'Erro ao processar autenticação: ' + error.message 
     });
   }
-}
+};
