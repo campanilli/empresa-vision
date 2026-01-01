@@ -216,6 +216,10 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            /* Adicionar estas propriedades para evitar corte das letras */
+            -webkit-text-fill-color: transparent;
+            padding-bottom: 5px; /* Adiciona espaço extra na parte inferior */
+            line-height: 1.1; /* Ajusta o espaçamento entre linhas */
         }
         
         .hero p {
@@ -950,7 +954,7 @@
         </div>
         <div class="container">
             <div class="hero-content">
-                <h1>Transforme Seu Negócio</h1>
+                <h1>Transforme Seu Negócio com Tecnologia</h1>
                 <p>Oferecemos soluções completas em desenvolvimento, infraestrutura e gestão de TI para impulsionar sua empresa no mundo digital.</p>
                 <a href="#contact" class="cta-button">
                     Solicite um Orçamento
