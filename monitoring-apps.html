@@ -3001,7 +3001,16 @@
         }
 
         // Inicia a aplicação quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', initApp);
+        document.addEventListener('DOMContentLoaded', async () => {
+          try {
+            const data = await fetchMonitorData();
+            renderMonitoring(data); // função que já existe no seu HTML
+            updateLastUpdate();
+          } catch (err) {
+            console.error(err);
+            showError('Erro ao carregar dados da API');
+          }
+        });
     </script>
 </body>
 </html>
