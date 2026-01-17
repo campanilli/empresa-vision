@@ -1,29 +1,18 @@
-﻿{
-  "Summary": {
-    "SuccessRate": 81.3,
-    "Successful": 713,
-    "Failed": 164,
-    "TotalURLs": 877
+﻿[
+  {
+    "Timestamp": "2025-12-29 10:21:35",
+    "Error": "",
+    "ResponseTime": 19,
+    "StatusCode": 401,
+    "URL": "http://combomulti-oci1...",
+    "Status": "Success"
   },
-  "Status": "Completed",
-  "Timestamp": "2025-12-29 10:18:55",
-  "NextCheck": "2025-12-29 10:23:55",
-  "Results": [
-    {
-      "Timestamp": "2025-12-29 10:21:35",
-      "Error": "",
-      "ResponseTime": 19,
-      "StatusCode": 401,
-      "URL": "http://combomulti-oci1.netservicos.corp/...",
-      "Status": "Success"
-    },
-    {
-      "Timestamp": "2025-12-29 10:21:36",
-      "Error": "Network Error",
-      "ResponseTime": 21074,
-      "StatusCode": 0,
-      "URL": "http://net001uatlnx1379...",
-      "Status": "Failed"
-    }
-  ]
-}
+  {
+    "Timestamp": "2025-12-29 10:21:36",
+    "Error": "Network Error",
+    "ResponseTime": 21074,
+    "StatusCode": 0,
+    "URL": "http://net001uatlnx1379...",
+    "Status": "Failed"
+  }
+]
