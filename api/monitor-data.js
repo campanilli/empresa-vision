@@ -33,19 +33,20 @@ export default function handler(req, res) {
       });
     }
 
-    const raw = fs.readFileSync(filePath, 'utf-8');
+    // 🔹 Lê o arquivo como LOG
+    const raw = fs.readFileSync(filePath, 'utf-8').trim();
 
-    // 🔹 Trata como LOG (não JSON puro)
-    const entries = raw
-      .split(/\n\s*,\s*\n/) // separa objetos
-      .map(chunk => {
-        try {
-          return JSON.parse(chunk);
-        } catch {
-          return null; // ignora entradas quebradas
-        }
-      })
-      .filter(Boolean);
+    // 🔹 Remove vírgula final (caso exista)
+    const cleaned = raw.replace(/,\s*$/, '');
+
+    let entries = [];
+
+    try {
+      // 🔹 Envelopa dinamicamente como array JSON válido
+      entries = JSON.parse(`[${cleaned}]`);
+    } catch (parseError) {
+      console.error('Erro ao converter monitor-data.json:', parseError.message);
+    }
 
     return res.status(200).json({
       total: entries.length,
