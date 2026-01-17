@@ -2599,22 +2599,20 @@
 
         // Função para buscar dados da API
         async function fetchMonitorData() {
-          const response = await fetch('/api/monitor-data', {
-            method: 'GET',
-            credentials: 'include', // 🔴 ESSENCIAL
-            headers: {
-              'Accept': 'application/json'
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/monitor-data`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                lastApiData = data;
+                document.getElementById('error-message').style.display = 'none';
+                return data;
+            } catch (error) {
+                console.error('Erro ao buscar dados da API:', error);
+                document.getElementById('error-message').style.display = 'block';
+                return null;
             }
-          });
-
-          if (!response.ok) {
-            if (response.status === 401) {
-              window.location.href = '/';
-            }
-            throw new Error(`Erro HTTP ${response.status}`);
-          }
-
-          return await response.json();
         }
 
         // Função CORRIGIDA para mapear URL para aplicação e ambiente
@@ -3001,16 +2999,7 @@
         }
 
         // Inicia a aplicação quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', async () => {
-          try {
-            const data = await fetchMonitorData();
-            renderMonitoring(data); // função que já existe no seu HTML
-            updateLastUpdate();
-          } catch (err) {
-            console.error(err);
-            showError('Erro ao carregar dados da API');
-          }
-        });
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
