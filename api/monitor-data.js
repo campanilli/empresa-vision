@@ -33,28 +33,38 @@ export default function handler(req, res) {
       });
     }
 
-    // 🔹 Lê o arquivo como LOG
-    const raw = fs.readFileSync(filePath, 'utf-8').trim();
-
-    // 🔹 Remove vírgula final (caso exista)
-    const cleaned = raw.replace(/,\s*$/, '');
-
-    let entries = [];
-
+    // 🔹 Lê o arquivo JSON diretamente
+    const rawData = fs.readFileSync(filePath, 'utf-8');
+    
+    // 🔹 Faz o parse do JSON
+    let data;
     try {
-      // 🔹 Envelopa dinamicamente como array JSON válido
-      entries = JSON.parse(`[${cleaned}]`);
+      data = JSON.parse(rawData);
     } catch (parseError) {
-      console.error('Erro ao converter monitor-data.json:', parseError.message);
+      console.error('Erro ao fazer parse do JSON:', parseError.message);
+      return res.status(500).json({
+        error: 'Arquivo JSON inválido',
+        details: parseError.message
+      });
     }
 
-    return res.status(200).json(entries);
+    // 🔹 Valida se o JSON tem a estrutura esperada
+    if (!data.Results || !Array.isArray(data.Results)) {
+      console.error('Estrutura do JSON inválida - falta campo Results');
+      return res.status(500).json({
+        error: 'Estrutura do arquivo JSON inválida',
+        details: 'Campo "Results" ausente ou não é um array'
+      });
+    }
 
+    // 🔹 Retorna o objeto JSON completo (não um array)
+    return res.status(200).json(data);
 
   } catch (err) {
-    console.error('Erro monitor-data:', err);
+    console.error('Erro ao processar monitor-data.json:', err);
     return res.status(500).json({
-      error: 'Erro ao processar monitor-data.json'
+      error: 'Erro ao processar monitor-data.json',
+      details: err.message
     });
   }
 }

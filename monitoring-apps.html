@@ -2605,9 +2605,13 @@
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 const data = await response.json();
-                lastApiData = data;
+                
+                // 🔹 NOVO: Verifica se data é um array e pega o primeiro elemento
+                const monitorData = Array.isArray(data) ? data[0] : data;
+                
+                lastApiData = monitorData;
                 document.getElementById('error-message').style.display = 'none';
-                return data;
+                return monitorData;
             } catch (error) {
                 console.error('Erro ao buscar dados da API:', error);
                 document.getElementById('error-message').style.display = 'block';
@@ -2680,6 +2684,12 @@
             // Limpa dados anteriores
             applicationData = {};
             
+            // 🔹 NOVO: Valida se data e data.Results existem
+            if (!data || !data.Results || !Array.isArray(data.Results)) {
+                console.error('Dados inválidos recebidos da API:', data);
+                return;
+            }
+
             // Inicializa estrutura de dados
             environments.forEach(env => {
                 applicationData[env] = {};
