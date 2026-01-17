@@ -48,10 +48,8 @@ export default function handler(req, res) {
       console.error('Erro ao converter monitor-data.json:', parseError.message);
     }
 
-    return res.status(200).json({
-      total: entries.length,
-      results: entries
-    });
+    return res.status(200).json(entries);
+
 
   } catch (err) {
     console.error('Erro monitor-data:', err);
