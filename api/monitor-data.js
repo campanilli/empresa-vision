@@ -33,8 +33,16 @@ export default function handler(req, res) {
       });
     }
 
-    // 🔹 Lê o arquivo JSON diretamente
-    const rawData = fs.readFileSync(filePath, 'utf-8');
+    // 🔹 Lê o arquivo JSON
+    let rawData = fs.readFileSync(filePath, 'utf-8');
+    
+    // 🔹 Remove BOM (Byte Order Mark) se existir
+    if (rawData.charCodeAt(0) === 0xFEFF) {
+      rawData = rawData.slice(1);
+    }
+    
+    // 🔹 Remove espaços em branco no início e fim
+    rawData = rawData.trim();
     
     // 🔹 Faz o parse do JSON
     let data;
@@ -42,6 +50,7 @@ export default function handler(req, res) {
       data = JSON.parse(rawData);
     } catch (parseError) {
       console.error('Erro ao fazer parse do JSON:', parseError.message);
+      console.error('Primeiros 100 caracteres:', rawData.substring(0, 100));
       return res.status(500).json({
         error: 'Arquivo JSON inválido',
         details: parseError.message
@@ -57,7 +66,7 @@ export default function handler(req, res) {
       });
     }
 
-    // 🔹 Retorna o objeto JSON completo (não um array)
+    // 🔹 Retorna o objeto JSON completo
     return res.status(200).json(data);
 
   } catch (err) {
