@@ -34,11 +34,27 @@ export default function handler(req, res) {
     }
 
     const raw = fs.readFileSync(filePath, 'utf-8');
-    const data = JSON.parse(raw);
 
-    res.status(200).json(data);
+    // 🔹 Trata como LOG (não JSON puro)
+    const entries = raw
+      .split(/\n\s*,\s*\n/) // separa objetos
+      .map(chunk => {
+        try {
+          return JSON.parse(chunk);
+        } catch {
+          return null; // ignora entradas quebradas
+        }
+      })
+      .filter(Boolean);
+
+    return res.status(200).json({
+      total: entries.length,
+      results: entries
+    });
+
   } catch (err) {
-    res.status(500).json({
+    console.error('Erro monitor-data:', err);
+    return res.status(500).json({
       error: 'Erro ao processar monitor-data.json'
     });
   }
