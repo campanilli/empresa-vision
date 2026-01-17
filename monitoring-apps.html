@@ -1,0 +1,2991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento Aplicações</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00c853;
+            --red: #ff1744;
+            --yellow: #ffab00;
+            --grey: #9e9e9e;
+            --blue: #2979ff;
+            --purple: #aa00ff;
+            --orange: #ff6d00;
+            
+            /* Light theme colors */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: white;
+            --bg-card: white;
+            --text-primary: #212529;
+            --text-secondary: #666;
+            --border-color: #e9ecef;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --env-bg: #495057;
+            --env-text: white;
+        }
+        
+        [data-theme="dark"] {
+            /* Dark theme colors */
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --border-color: #30363d;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --env-bg: #30363d;
+            --env-text: #e6edf3;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Container principal */
+        .main-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Header com título e toggle */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: relative;
+            padding: 0 10px;
+        }
+        
+        h1 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+            position: absolute;
+            /*left: 50%;
+            transform: translateX(-50%);*/
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        
+        h1 i {
+            flex-shrink: 0; /* Impede o ícone de encolher */
+            font-size: 0.9em;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px var(--shadow);
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--bg-secondary);
+            transform: translateY(-1px);
+        }
+        
+        .theme-icon {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-toggle:hover .theme-icon {
+            transform: scale(1.1);
+        }
+        
+        /* Campo de pesquisa */
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px var(--shadow);
+            box-sizing: border-box;
+        }
+        
+        .search-input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 4px 12px rgba(41, 121, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 18px;
+            pointer-events: none;
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .clear-search:hover {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        .search-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-chip {
+            padding: 6px 12px;
+            background-color: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .filter-chip:hover {
+            background-color: var(--bg-secondary);
+            transform: translateY(-1px);
+        }
+        
+        .filter-chip.active {
+            background-color: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+        
+        .search-results {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+        
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        /* Responsivo para mobile */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 0 5px;
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 1.4em;
+                margin-bottom: 0px;
+                position: static;
+                text-align: center;
+                width: 100%;
+                justify-content: center;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            h1 i {
+                font-size: 0.8em;
+            }
+
+            .theme-toggle {
+                margin-left: 0;
+                align-self: center;
+            }
+
+            .search-input {
+                font-size: 16px;
+                padding: 10px 18px 10px 40px;
+            }
+            
+            .search-filters {
+                gap: 6px;
+            }
+            
+            .filter-chip {
+                font-size: 0.8em;
+                padding: 4px 10px;
+            }
+        }
+        
+        .status-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .status-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+        
+        .legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.9em;
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 768px) {
+            .legend {
+                gap: 8px;
+            }
+            
+            .legend-item {
+                font-size: 0.8em;
+                gap: 3px;
+            }
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        
+        .timestamp {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-gap: 12px;
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Responsividade para diferentes tamanhos de tela */
+        @media (max-width: 1400px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                grid-gap: 10px;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                grid-gap: 8px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                grid-gap: 6px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                grid-gap: 5px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+        
+        .environment {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px var(--shadow);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .environment:hover {
+            box-shadow: 0 4px 12px var(--shadow);
+            transform: translateY(-2px);
+        }
+        
+        .environment.hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .environment {
+                padding: 8px;
+                border-radius: 6px;
+            }
+        }
+        
+        .environment-title {
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+            background-color: var(--env-bg);
+            color: var(--env-text);
+            padding: 6px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .environment-title {
+                font-size: 0.9em;
+                padding: 5px;
+                margin-bottom: 8px;
+            }
+        }
+        
+        .applications-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 6px;
+            width: 100%;
+        }
+        
+        @media (max-width: 576px) {
+            .applications-grid {
+                grid-gap: 4px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .applications-grid {
+                grid-template-columns: 1fr;
+                grid-gap: 3px;
+            }
+        }
+        
+        .application {
+            padding: 6px 4px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            cursor: pointer;
+            position: relative;
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            word-break: break-word;
+            box-sizing: border-box;
+        }
+        
+        .application.hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 768px) {
+            .application {
+                font-size: 0.75em;
+                min-height: 35px;
+                padding: 5px 3px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .application {
+                font-size: 0.7em;
+                min-height: 32px;
+                padding: 4px 2px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .application {
+                font-size: 0.75em;
+                min-height: 35px;
+                padding: 5px 4px;
+            }
+        }
+        
+        .application:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .application .response-time {
+            font-size: 0.8em;
+            font-weight: normal;
+            margin-top: 1px;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .application .response-time {
+                font-size: 0.75em;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .application .response-time {
+                font-size: 0.7em;
+            }
+        }
+        
+        .status-online {
+            background-color: var(--green);
+        }
+        
+        .status-offline {
+            background-color: var(--red);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-warning {
+            background-color: var(--yellow);
+        }
+        
+        .status-degraded {
+            background-color: var(--orange);
+        }
+        
+        .status-unknown {
+            background-color: var(--grey);
+        }
+        
+        .status-loading {
+            background-color: var(--blue);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-maintenance {
+            background-color: var(--purple);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        
+        .refresh-button {
+            display: block;
+            margin: 15px auto;
+            padding: 10px 20px;
+            background-color: #2979ff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(41, 121, 255, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .refresh-button {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+        
+        .refresh-button:hover {
+            background-color: #1976d2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(41, 121, 255, 0.4);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 95%;
+            max-height: 90%;
+            overflow-y: auto;
+            width: 900px;
+            min-width: 600px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 12px 40px var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        @media (max-width: 1024px) {
+            .modal-content {
+                width: 90%;
+                min-width: 500px;
+                padding: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                min-width: auto;
+                max-width: 95%;
+                padding: 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 98%;
+                padding: 12px;
+                border-radius: 8px;
+            }
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: transparent;
+        }
+        
+        .close-button:hover {
+            color: var(--text-primary);
+            background-color: var(--bg-secondary);
+            transform: scale(1.1);
+        }
+        
+        .app-details {
+            margin-top: 20px;
+        }
+        
+        .app-details h3, .app-details h4 {
+            color: var(--text-primary);
+        }
+        
+        .app-details table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-secondary);
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 0.9em;
+        }
+        
+        .app-details table th, .app-details table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 8px;
+            text-align: left;
+            color: var(--text-primary);
+            vertical-align: top;
+        }
+        
+        .app-details table th {
+            background-color: var(--env-bg);
+            color: var(--env-text);
+            font-weight: 600;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+        
+        .app-details table td:first-child {
+            min-width: 200px;
+            max-width: 400px;
+            word-break: break-all;
+        }
+        
+        .app-details table td:nth-child(2) {
+            white-space: nowrap;
+            text-align: center;
+        }
+        
+        .app-details table td:nth-child(3), 
+        .app-details table td:nth-child(4) {
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .app-details table td:nth-child(5) {
+            white-space: nowrap;
+            font-size: 0.85em;
+        }
+        
+        .app-details table a {
+            color: #2979ff;
+            text-decoration: underline;
+        }
+        
+        .app-details table a:hover {
+            color: #1976d2;
+            text-decoration: none;
+        }
+        
+        .app-details table a:visited {
+            color: #aa00ff;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            padding: 12px;
+            background-color: var(--red);
+            color: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1001;
+            font-size: 0.9em;
+            max-width: 300px;
+        }
+        
+        @media (max-width: 768px) {
+            .notification {
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                text-align: center;
+                font-size: 0.85em;
+            }
+        }
+        
+        .summary-stats {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            background-color: var(--bg-card);
+            padding: 10px 15px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px var(--shadow);
+            text-align: center;
+            min-width: 70px;
+            flex: 1;
+            max-width: 120px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+        
+        .stat-number {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 2px;
+            color: var(--text-primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .summary-stats {
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            
+            .stat-item {
+                padding: 8px 12px;
+                min-width: 60px;
+            }
+            
+            .stat-number {
+                font-size: 1.4em;
+            }
+            
+            .stat-label {
+                font-size: 0.75em;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .stat-item {
+                padding: 6px 10px;
+                min-width: 50px;
+            }
+            
+            .stat-number {
+                font-size: 1.2em;
+            }
+            
+            .stat-label {
+                font-size: 0.7em;
+            }
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+            border: 1px solid #f5c6cb;
+        }
+        
+        [data-theme="dark"] .error-message {
+            background-color: #2d1b1f;
+            color: #f8d7da;
+            border-color: #5a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1><i class="fas fa-server"></i> Monitoramento de Aplicações</h1>
+            <div class="theme-toggle" id="theme-toggle" title="Alternar tema">
+                <span class="theme-icon" id="theme-icon">🌙</span>
+                <span id="theme-text">Escuro</span>
+            </div>
+        </div>
+    
+        <div class="error-message" id="error-message">
+            Erro ao carregar dados da API. Verifique se o servidor está funcionando.
+        </div>
+
+        <!-- Campo de pesquisa -->
+        <div class="search-container">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    class="search-input" 
+                    placeholder="Pesquisar aplicações, ambientes ou status..."
+                    autocomplete="off"
+                >
+                <button class="clear-search" id="clear-search" title="Limpar pesquisa">×</button>
+            </div>
+        </div>
+        
+        <div class="search-filters" id="search-filters">
+            <div class="filter-chip" data-filter="all">Todos</div>
+            <div class="filter-chip" data-filter="online">Online</div>
+            <div class="filter-chip" data-filter="offline">Offline</div>
+            <div class="filter-chip" data-filter="warning">Lento</div>
+            <div class="filter-chip" data-filter="degraded">Degradado</div>
+            <div class="filter-chip" data-filter="maintenance">Manutenção</div>
+            <div class="filter-chip" data-filter="unknown">Desconhecido</div>
+        </div>
+        
+        <div class="search-results" id="search-results"></div>
+
+        <div class="status-info">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--green);"></div>
+                    <span>Online</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--red);"></div>
+                    <span>Offline</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--yellow);"></div>
+                    <span>Lento</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--orange);"></div>
+                    <span>Degradado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--purple);"></div>
+                    <span>Manutenção</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: var(--grey);"></div>
+                    <span>Desconhecido</span>
+                </div>
+            </div>
+            <div class="timestamp">Última atualização: <span id="last-update">--</span></div>
+        </div>
+        
+        <div class="summary-stats" id="summary-stats">
+            <div class="stat-item">
+                <div class="stat-number" id="stat-online">0</div>
+                <div class="stat-label">Online</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-offline">0</div>
+                <div class="stat-label">Offline</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-issues">0</div>
+                <div class="stat-label">Com Problemas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-total">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+        
+        <div class="grid-container" id="monitoring-grid">
+            <!-- Será preenchido dinamicamente via JavaScript -->
+        </div>
+        
+        <div class="no-results" id="no-results" style="display: none;">
+            <div class="no-results-icon">🔍</div>
+            <div>Nenhum resultado encontrado</div>
+            <div style="margin-top: 10px; font-size: 0.9em;">Tente ajustar os termos de pesquisa ou filtros</div>
+        </div>
+        
+        <button class="refresh-button" id="refresh-button">Atualizar Agora</button>
+        
+        <div id="app-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="close-modal">&times;</span>
+                <h2 id="modal-title">Detalhes da Aplicação</h2>
+                <div class="app-details" id="modal-details">
+                    <!-- Detalhes da aplicação serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="notification" id="notification">
+            Algumas aplicações estão com problemas!
+        </div>
+        
+    </div> <!-- fim main-container -->
+    
+    <script>
+        // Configuração de tema
+        function initTheme() {
+            const savedTheme = localStorage.getItem('monitor-theme') || 'light';
+            setTheme(savedTheme);
+        }
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+            
+            if (theme === 'dark') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Claro';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Escuro';
+            }
+            
+            // Salvar preferência
+            localStorage.setItem('monitor-theme', theme);
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+        
+        // Configuração da API
+        //const API_BASE_URL = 'http://localhost:8080';
+        const API_BASE_URL = 'http://clr00n001323894:8080';
+        //const API_BASE_URL = 'http://192.168.0.18:8080';
+        //const API_BASE_URL = 'http://x9:8080';
+        
+        // Mapeamento de URLs para aplicações (incluindo suporte a credenciais)
+        const urlToAppMapping = {
+            
+            'wls-dsp-crt1': [  { env: 'CRT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-crt1': [  { env: 'CRT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-sit1': [  { env: 'SIT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit1': [  { env: 'SIT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-sit3': [  { env: 'SIT3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit3': [  { env: 'SIT3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-sit4': [  { env: 'SIT4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit4': [  { env: 'SIT4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-sit5': [  { env: 'SIT5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit5': [  { env: 'SIT5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-sit6': [  { env: 'SIT6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit6': [  { env: 'SIT6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-sit7': [  { env: 'SIT7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit7': [  { env: 'SIT7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-oci1': [  { env: 'OCI1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci1': [  { env: 'OCI1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-oci2': [  { env: 'OCI2', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci2': [  { env: 'OCI2', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-oci3': [  { env: 'OCI3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci3': [  { env: 'OCI3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-oci4': [  { env: 'OCI4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci4': [  { env: 'OCI4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-oci5': [  { env: 'OCI5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci5': [  { env: 'OCI5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-oci6': [  { env: 'OCI6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci6': [  { env: 'OCI6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'wls-dsp-oci7': [  { env: 'OCI7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci7': [  { env: 'OCI7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            'dsp-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ Aqualogic Data Services Platform (DSP)' },],
+            
+            // Enterprise Service Bus Movel
+            'wls-esbsoa-crt1': [  { env: 'CRT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-crt1': [  { env: 'CRT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-crt1-vm1': [  { env: 'CRT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-crt1-vm2': [  { env: 'CRT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-sit1': [  { env: 'SIT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit1': [  { env: 'SIT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit1-vm1': [  { env: 'SIT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit1-vm2': [  { env: 'SIT1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-sit3': [  { env: 'SIT3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit3': [  { env: 'SIT3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit3-vm1': [  { env: 'SIT3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit3-vm2': [  { env: 'SIT3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-sit4': [  { env: 'SIT4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit4': [  { env: 'SIT4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit4-vm1': [  { env: 'SIT4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit4-vm2': [  { env: 'SIT4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-sit5': [  { env: 'SIT5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit5': [  { env: 'SIT5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit5-vm1': [  { env: 'SIT5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit5-vm2': [  { env: 'SIT5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-sit6': [  { env: 'SIT6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit6': [  { env: 'SIT6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit6-vm1': [  { env: 'SIT6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit6-vm2': [  { env: 'SIT6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-sit7': [  { env: 'SIT7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit7': [  { env: 'SIT7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit7-vm1': [  { env: 'SIT7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-sit7-vm2': [  { env: 'SIT7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-oci1': [  { env: 'OCI1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci1': [  { env: 'OCI1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci1-vm1': [  { env: 'OCI1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci1-vm2': [  { env: 'OCI1', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-oci2': [  { env: 'OCI2', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci2': [  { env: 'OCI2', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci2-vm1': [  { env: 'OCI2', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci2-vm2': [  { env: 'OCI2', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-oci3': [  { env: 'OCI3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci3': [  { env: 'OCI3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci3-vm1': [  { env: 'OCI3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci3-vm2': [  { env: 'OCI3', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-oci4': [  { env: 'OCI4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci4': [  { env: 'OCI4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci4-vm1': [  { env: 'OCI4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci4-vm2': [  { env: 'OCI4', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-oci5': [  { env: 'OCI5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci5': [  { env: 'OCI5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci5-vm1': [  { env: 'OCI5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci5-vm2': [  { env: 'OCI5', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-oci6': [  { env: 'OCI6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci6': [  { env: 'OCI6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci6-vm1': [  { env: 'OCI6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci6-vm2': [  { env: 'OCI6', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'wls-esbsoa-oci7': [  { env: 'OCI7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci7': [  { env: 'OCI7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci7-vm1': [  { env: 'OCI7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+            'esbsoa-oci7-vm2': [  { env: 'OCI7', app: 'ⓜ Enterprise Service Bus Movel (ESB)' },],
+
+            // Enterprise Service Bus Residencial (ESB)
+            //'wls-servbus-crt1.netservicos.corp': [  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            //'MCIDA:x1234@servbus-crt1.netservicos.corp:8008/ativar/roteamento/agendamento/BloqueioAgenda11V1?WSDL': [  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            //'MCIDA:x1234@servbus-crt1-vm1.netservicos.corp:8008/ativar/roteamento/agendamento/BloqueioAgenda11V1?WSDL': [  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            //'MCIDA:x1234@servbus-crt1-vm2.netservicos.corp:8008/ativar/roteamento/agendamento/BloqueioAgenda11V1?WSDL': [  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-crt1': [  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-crt1.netservicos.corp': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-sit1': [  { env: 'SIT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit1.netservicos.corp': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-sit3': [  { env: 'SIT3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit3.netservicos.corp': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-sit4': [  { env: 'SIT4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit4.netservicos.corp': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-sit5': [  { env: 'SIT5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit5.netservicos.corp': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-sit6': [  { env: 'SIT6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit6.netservicos.corp': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-sit7': [  { env: 'SIT7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit7.netservicos.corp': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-oci1': [  { env: 'OCI1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci1.netservicos.corp': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-oci2': [  { env: 'OCI2', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci2.netservicos.corp': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-oci3': [  { env: 'OCI3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci3.netservicos.corp': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-oci4': [  { env: 'OCI4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci4.netservicos.corp': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-oci5': [  { env: 'OCI5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci5.netservicos.corp': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-oci6': [  { env: 'OCI6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci6.netservicos.corp': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'wls-servbus-oci7': [  { env: 'OCI7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci7.netservicos.corp': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+            'servbus-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ Enterprise Service Bus Residencial (ESB)' },],
+
+            // Weblogic Integration (WLI)
+            'wls-wli-crt1-arrecadar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-arrecadar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm1-arrecadar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm2-arrecadar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-crt1-ativar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-ativar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm1-ativar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm2-ativar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-crt1-infraestrutura': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-infraestrutura': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm1-infraestrutura': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm2-infraestrutura': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-crt1-relacionar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-relacionar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm1-relacionar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm2-relacionar': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-crt1-vender': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vender': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm1-vender': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-crt1-vm2-vender': [  { env: 'CRT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-sit1': [  { env: 'SIT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit1': [  { env: 'SIT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-sit3': [  { env: 'SIT3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit3': [  { env: 'SIT3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-sit4': [  { env: 'SIT4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit4': [  { env: 'SIT4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-sit5': [  { env: 'SIT5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit5': [  { env: 'SIT5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-sit6': [  { env: 'SIT6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit6': [  { env: 'SIT6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-sit7': [  { env: 'SIT7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit7': [  { env: 'SIT7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-oci1': [  { env: 'OCI1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci1': [  { env: 'OCI1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-oci2': [  { env: 'OCI2', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci2': [  { env: 'OCI2', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-oci3': [  { env: 'OCI3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci3': [  { env: 'OCI3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-oci4': [  { env: 'OCI4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci4': [  { env: 'OCI4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-oci5': [  { env: 'OCI5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci5': [  { env: 'OCI5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-oci6': [  { env: 'OCI6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci6': [  { env: 'OCI6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wls-wli-oci7': [  { env: 'OCI7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci7': [  { env: 'OCI7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            'wli-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ Weblogic Integration (WLI)' },],
+            
+            // Módulo Integrador (MI)
+            'http://wls-mi-crt1': [  { env: 'CRT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-crt1': [  { env: 'CRT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-sit1': [  { env: 'SIT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit1': [  { env: 'SIT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-sit3': [  { env: 'SIT3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit3': [  { env: 'SIT3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-sit4': [  { env: 'SIT4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit4': [  { env: 'SIT4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-sit5': [  { env: 'SIT5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit5': [  { env: 'SIT5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-sit6': [  { env: 'SIT6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit6': [  { env: 'SIT6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-sit7': [  { env: 'SIT7', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit7': [  { env: 'SIT7', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-oci1': [  { env: 'OCI1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci1': [  { env: 'OCI1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-oci2': [  { env: 'OCI2', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci2': [  { env: 'OCI2', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-oci3': [  { env: 'OCI3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci3': [  { env: 'OCI3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-oci4': [  { env: 'OCI4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci4': [  { env: 'OCI4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-oci5': [  { env: 'OCI5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci5': [  { env: 'OCI5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-oci6': [  { env: 'OCI6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci6': [  { env: 'OCI6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ Módulo Integrador (MI)' },],
+            'http://wls-mi-oci7': [  { env: 'OCI7', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci7': [  { env: 'OCI7', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ Módulo Integrador (MI)' },],
+            'mi-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ Módulo Integrador (MI)' },],
+
+            // Oracle Service Bus (OSB)
+            'wls-osb-crt1': [  { env: 'CRT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-crt1': [  { env: 'CRT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-sit1': [  { env: 'SIT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit1': [  { env: 'SIT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-sit3': [  { env: 'SIT3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit3': [  { env: 'SIT3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-sit4': [  { env: 'SIT4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit4': [  { env: 'SIT4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-sit5': [  { env: 'SIT5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit5': [  { env: 'SIT5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-sit6': [  { env: 'SIT6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit6': [  { env: 'SIT6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-sit7': [  { env: 'SIT7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit7': [  { env: 'SIT7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-oci1': [  { env: 'OCI1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci1': [  { env: 'OCI1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-oci2': [  { env: 'OCI2', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci2': [  { env: 'OCI2', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-oci3': [  { env: 'OCI3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci3': [  { env: 'OCI3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-oci4': [  { env: 'OCI4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci4': [  { env: 'OCI4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-oci5': [  { env: 'OCI5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci5': [  { env: 'OCI5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-oci6': [  { env: 'OCI6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci6': [  { env: 'OCI6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'wls-osb-oci7': [  { env: 'OCI7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci7': [  { env: 'OCI7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+            'osb-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ Oracle Service Bus (OSB)' },],
+
+            // Fachada NETSMS
+            'wls-fachada-netsms-crt1': [  { env: 'CRT1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-crt1': [  { env: 'CRT1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-sit1': [  { env: 'SIT1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit1': [  { env: 'SIT1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-sit3': [  { env: 'SIT3', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit3': [  { env: 'SIT3', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-sit4': [  { env: 'SIT4', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit4': [  { env: 'SIT4', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-sit5': [  { env: 'SIT5', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit5': [  { env: 'SIT5', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-sit6': [  { env: 'SIT6', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit6': [  { env: 'SIT6', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-sit7': [  { env: 'SIT7', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit7': [  { env: 'SIT7', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-oci1': [  { env: 'OCI1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci1': [  { env: 'OCI1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-oci2': [  { env: 'OCI2', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci2': [  { env: 'OCI2', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-oci3': [  { env: 'OCI3', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci3': [  { env: 'OCI3', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-oci4': [  { env: 'OCI4', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci4': [  { env: 'OCI4', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-oci5': [  { env: 'OCI5', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci5': [  { env: 'OCI5', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-oci6': [  { env: 'OCI6', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci6': [  { env: 'OCI6', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ Fachada NETSMS' },],
+            'wls-fachada-netsms-oci7': [  { env: 'OCI7', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci7': [  { env: 'OCI7', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ Fachada NETSMS' },],
+            'fachada-netsms-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ Fachada NETSMS' },],
+
+            // Automação de Vendas (AUTCM)
+            'multibe-crt1': [  { env: 'CRT1', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-sit1': [  { env: 'SIT1', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-sit3': [  { env: 'SIT3', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-sit4': [  { env: 'SIT4', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-sit5': [  { env: 'SIT5', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-sit6': [  { env: 'SIT6', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-sit7': [  { env: 'SIT7', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-oci1': [  { env: 'OCI1', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-oci2': [  { env: 'OCI2', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-oci3': [  { env: 'OCI3', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-oci4': [  { env: 'OCI4', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-oci5': [  { env: 'OCI5', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-oci6': [  { env: 'OCI6', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            'multibe-oci7': [  { env: 'OCI7', app: 'ⓡ Automação de Vendas (AUTCM)' },],
+            
+            // COMBOMULTI (deeppurple)
+            'combomulti-crt1': [  { env: 'CRT1', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'CRT1', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-sit1': [  { env: 'SIT1', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'SIT1', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-sit3': [  { env: 'SIT3', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'SIT3', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-sit4': [  { env: 'SIT4', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'SIT4', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-sit5': [  { env: 'SIT5', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'SIT5', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-sit6': [  { env: 'SIT6', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'SIT6', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-sit7': [  { env: 'SIT7', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'SIT7', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-oci1': [  { env: 'OCI1', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'OCI1', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-oci2': [  { env: 'OCI2', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'OCI2', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-oci3': [  { env: 'OCI3', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'OCI3', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-oci4': [  { env: 'OCI4', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'OCI4', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-oci5': [  { env: 'OCI5', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'OCI5', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-oci6': [  { env: 'OCI6', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'OCI6', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+            'combomulti-oci7': [  { env: 'OCI7', app: 'ⓡ COMBOMULTI (deeppurple)' },  { env: 'OCI7', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },],
+
+            // FEPP
+            'fepp-crt1': [  { env: 'CRT1', app: 'ⓡ FEPP' },],
+            'fepp-sit1': [  { env: 'SIT1', app: 'ⓡ FEPP' },],
+            'fepp-sit3': [  { env: 'SIT3', app: 'ⓡ FEPP' },],
+            'fepp-sit4': [  { env: 'SIT4', app: 'ⓡ FEPP' },],
+            'fepp-sit5': [  { env: 'SIT5', app: 'ⓡ FEPP' },],
+            'fepp-sit6': [  { env: 'SIT6', app: 'ⓡ FEPP' },],
+            'fepp-sit7': [  { env: 'SIT7', app: 'ⓡ FEPP' },],
+            'fepp-oci1': [  { env: 'OCI1', app: 'ⓡ FEPP' },],
+            'fepp-oci2': [  { env: 'OCI2', app: 'ⓡ FEPP' },],
+            'fepp-oci3': [  { env: 'OCI3', app: 'ⓡ FEPP' },],
+            'fepp-oci4': [  { env: 'OCI4', app: 'ⓡ FEPP' },],
+            'fepp-oci5': [  { env: 'OCI5', app: 'ⓡ FEPP' },],
+            'fepp-oci6': [  { env: 'OCI6', app: 'ⓡ FEPP' },],
+            'fepp-oci7': [  { env: 'OCI7', app: 'ⓡ FEPP' },],
+            
+            // NETHOME (ATLAS)
+            'wls-atlas-crt1': [  { env: 'CRT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-crt1': [  { env: 'CRT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-sit1': [  { env: 'SIT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit1': [  { env: 'SIT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-sit3': [  { env: 'SIT3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit3': [  { env: 'SIT3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-sit4': [  { env: 'SIT4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit4': [  { env: 'SIT4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-sit5': [  { env: 'SIT5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit5': [  { env: 'SIT5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-sit6': [  { env: 'SIT6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit6': [  { env: 'SIT6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-sit7': [  { env: 'SIT7', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit7': [  { env: 'SIT7', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-oci1': [  { env: 'OCI1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci1': [  { env: 'OCI1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-oci2': [  { env: 'OCI2', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci2': [  { env: 'OCI2', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-oci3': [  { env: 'OCI3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci3': [  { env: 'OCI3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-oci4': [  { env: 'OCI4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci4': [  { env: 'OCI4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-oci5': [  { env: 'OCI5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci5': [  { env: 'OCI5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-oci6': [  { env: 'OCI6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci6': [  { env: 'OCI6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ NETHOME (ATLAS)' },],
+            'wls-atlas-oci7': [  { env: 'OCI7', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci7': [  { env: 'OCI7', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ NETHOME (ATLAS)' },],
+            'atlas-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ NETHOME (ATLAS)' },],
+            
+            // NETCOBRANCA
+            'wls-cobranca-crt1': [  { env: 'CRT1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-crt1.netservicos.corp': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-sit1': [  { env: 'SIT1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit1.netservicos.corp': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-sit3': [  { env: 'SIT3', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit3.netservicos.corp': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-sit4': [  { env: 'SIT4', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit4.netservicos.corp': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-sit5': [  { env: 'SIT5', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit5.netservicos.corp': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-sit6': [  { env: 'SIT6', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit6.netservicos.corp': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-sit7': [  { env: 'SIT7', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit7.netservicos.corp': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-oci1': [  { env: 'OCI1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci1.netservicos.corp': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-oci2': [  { env: 'OCI2', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci2.netservicos.corp': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-oci3': [  { env: 'OCI3', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci3.netservicos.corp': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-oci4': [  { env: 'OCI4', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci4.netservicos.corp': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-oci5': [  { env: 'OCI5', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci5.netservicos.corp': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-oci6': [  { env: 'OCI6', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci6.netservicos.corp': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ NETCOBRANCA' },],
+            'wls-cobranca-oci7': [  { env: 'OCI7', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci7.netservicos.corp': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ NETCOBRANCA' },],
+            'cobranca-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ NETCOBRANCA' },],
+            
+            // CRM
+            'wls-crm-crt1': [  { env: 'CRT1', app: 'ⓡ CRM' },],
+            'crm-crt1': [  { env: 'CRT1', app: 'ⓡ CRM' },],
+            'crm-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ CRM' },],
+            'crm-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ CRM' },],
+            'wls-crm-sit1': [  { env: 'SIT1', app: 'ⓡ CRM' },],
+            'crm-sit1': [  { env: 'SIT1', app: 'ⓡ CRM' },],
+            'crm-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ CRM' },],
+            'crm-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ CRM' },],
+            'wls-crm-sit3': [  { env: 'SIT3', app: 'ⓡ CRM' },],
+            'crm-sit3': [  { env: 'SIT3', app: 'ⓡ CRM' },],
+            'crm-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ CRM' },],
+            'crm-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ CRM' },],
+            'wls-crm-sit4': [  { env: 'SIT4', app: 'ⓡ CRM' },],
+            'crm-sit4': [  { env: 'SIT4', app: 'ⓡ CRM' },],
+            'crm-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ CRM' },],
+            'crm-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ CRM' },],
+            'wls-crm-sit5': [  { env: 'SIT5', app: 'ⓡ CRM' },],
+            'crm-sit5': [  { env: 'SIT5', app: 'ⓡ CRM' },],
+            'crm-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ CRM' },],
+            'crm-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ CRM' },],
+            'wls-crm-sit6': [  { env: 'SIT6', app: 'ⓡ CRM' },],
+            'crm-sit6': [  { env: 'SIT6', app: 'ⓡ CRM' },],
+            'crm-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ CRM' },],
+            'crm-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ CRM' },],
+            'wls-crm-sit7': [  { env: 'SIT7', app: 'ⓡ CRM' },],
+            'crm-sit7': [  { env: 'SIT7', app: 'ⓡ CRM' },],
+            'crm-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ CRM' },],
+            'crm-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ CRM' },],
+            'wls-crm-oci1': [  { env: 'OCI1', app: 'ⓡ CRM' },],
+            'crm-oci1': [  { env: 'OCI1', app: 'ⓡ CRM' },],
+            'crm-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ CRM' },],
+            'crm-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ CRM' },],
+            'wls-crm-oci2': [  { env: 'OCI2', app: 'ⓡ CRM' },],
+            'crm-oci2': [  { env: 'OCI2', app: 'ⓡ CRM' },],
+            'crm-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ CRM' },],
+            'crm-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ CRM' },],
+            'wls-crm-oci3': [  { env: 'OCI3', app: 'ⓡ CRM' },],
+            'crm-oci3': [  { env: 'OCI3', app: 'ⓡ CRM' },],
+            'crm-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ CRM' },],
+            'crm-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ CRM' },],
+            'wls-crm-oci4': [  { env: 'OCI4', app: 'ⓡ CRM' },],
+            'crm-oci4': [  { env: 'OCI4', app: 'ⓡ CRM' },],
+            'crm-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ CRM' },],
+            'crm-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ CRM' },],
+            'wls-crm-oci5': [  { env: 'OCI5', app: 'ⓡ CRM' },],
+            'crm-oci5': [  { env: 'OCI5', app: 'ⓡ CRM' },],
+            'crm-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ CRM' },],
+            'crm-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ CRM' },],
+            'wls-crm-oci6': [  { env: 'OCI6', app: 'ⓡ CRM' },],
+            'crm-oci6': [  { env: 'OCI6', app: 'ⓡ CRM' },],
+            'crm-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ CRM' },],
+            'crm-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ CRM' },],
+            'wls-crm-oci7': [  { env: 'OCI7', app: 'ⓡ CRM' },],
+            'crm-oci7': [  { env: 'OCI7', app: 'ⓡ CRM' },],
+            'crm-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ CRM' },],
+            'crm-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ CRM' },],
+
+            // OMS
+            'wls-oms-crt1': [  { env: 'CRT1', app: 'ⓡ OMS' },],
+            'oms-crt1': [  { env: 'CRT1', app: 'ⓡ OMS' },],
+            'oms-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ OMS' },],
+            'oms-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ OMS' },],
+            'wls-oms-sit1': [  { env: 'SIT1', app: 'ⓡ OMS' },],
+            'oms-sit1': [  { env: 'SIT1', app: 'ⓡ OMS' },],
+            'oms-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ OMS' },],
+            'oms-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ OMS' },],
+            'wls-oms-sit3': [  { env: 'SIT3', app: 'ⓡ OMS' },],
+            'oms-sit3': [  { env: 'SIT3', app: 'ⓡ OMS' },],
+            'oms-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ OMS' },],
+            'oms-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ OMS' },],
+            'wls-oms-sit4': [  { env: 'SIT4', app: 'ⓡ OMS' },],
+            'oms-sit4': [  { env: 'SIT4', app: 'ⓡ OMS' },],
+            'oms-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ OMS' },],
+            'oms-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ OMS' },],
+            'wls-oms-sit5': [  { env: 'SIT5', app: 'ⓡ OMS' },],
+            'oms-sit5': [  { env: 'SIT5', app: 'ⓡ OMS' },],
+            'oms-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ OMS' },],
+            'oms-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ OMS' },],
+            'wls-oms-sit6': [  { env: 'SIT6', app: 'ⓡ OMS' },],
+            'oms-sit6': [  { env: 'SIT6', app: 'ⓡ OMS' },],
+            'oms-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ OMS' },],
+            'oms-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ OMS' },],
+            'wls-oms-sit7': [  { env: 'SIT7', app: 'ⓡ OMS' },],
+            'oms-sit7': [  { env: 'SIT7', app: 'ⓡ OMS' },],
+            'oms-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ OMS' },],
+            'oms-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ OMS' },],
+            'wls-oms-oci1': [  { env: 'OCI1', app: 'ⓡ OMS' },],
+            'oms-oci1': [  { env: 'OCI1', app: 'ⓡ OMS' },],
+            'oms-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ OMS' },],
+            'oms-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ OMS' },],
+            'wls-oms-oci2': [  { env: 'OCI2', app: 'ⓡ OMS' },],
+            'oms-oci2': [  { env: 'OCI2', app: 'ⓡ OMS' },],
+            'oms-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ OMS' },],
+            'oms-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ OMS' },],
+            'wls-oms-oci3': [  { env: 'OCI3', app: 'ⓡ OMS' },],
+            'oms-oci3': [  { env: 'OCI3', app: 'ⓡ OMS' },],
+            'oms-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ OMS' },],
+            'oms-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ OMS' },],
+            'wls-oms-oci4': [  { env: 'OCI4', app: 'ⓡ OMS' },],
+            'oms-oci4': [  { env: 'OCI4', app: 'ⓡ OMS' },],
+            'oms-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ OMS' },],
+            'oms-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ OMS' },],
+            'wls-oms-oci5': [  { env: 'OCI5', app: 'ⓡ OMS' },],
+            'oms-oci5': [  { env: 'OCI5', app: 'ⓡ OMS' },],
+            'oms-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ OMS' },],
+            'oms-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ OMS' },],
+            'wls-oms-oci6': [  { env: 'OCI6', app: 'ⓡ OMS' },],
+            'oms-oci6': [  { env: 'OCI6', app: 'ⓡ OMS' },],
+            'oms-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ OMS' },],
+            'oms-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ OMS' },],
+            'wls-oms-oci7': [  { env: 'OCI7', app: 'ⓡ OMS' },],
+            'oms-oci7': [  { env: 'OCI7', app: 'ⓡ OMS' },],
+            'oms-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ OMS' },],
+            'oms-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ OMS' },],
+
+            // VENDA
+            'wls-venda-crt1': [  { env: 'CRT1', app: 'ⓡ VENDA' },],
+            'venda-crt1': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ VENDA' },  {env: 'CRT1', app: 'ⓡ Citrix NetScaler' },],
+            'venda-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ VENDA' },],
+            'venda-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ VENDA' },],
+            'wls-venda-sit1': [  { env: 'SIT1', app: 'ⓡ VENDA' },],
+            'venda-sit1': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ VENDA' },  {env: 'SIT1', app: 'ⓡ Citrix NetScaler' },],
+            'venda-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ VENDA' },],
+            'venda-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ VENDA' },],
+            'wls-venda-sit3': [  { env: 'SIT3', app: 'ⓡ VENDA' },],
+            'venda-sit3': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ VENDA' },  {env: 'SIT3', app: 'ⓡ Citrix NetScaler' },],
+            'venda-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ VENDA' },],
+            'venda-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ VENDA' },],
+            'wls-venda-sit4': [  { env: 'SIT4', app: 'ⓡ VENDA' },],
+            'venda-sit4': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ VENDA' },  {env: 'SIT4', app: 'ⓡ Citrix NetScaler' },],
+            'venda-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ VENDA' },],
+            'venda-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ VENDA' },],
+            'wls-venda-sit5': [  { env: 'SIT5', app: 'ⓡ VENDA' },],
+            'venda-sit5': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ VENDA' },  {env: 'SIT5', app: 'ⓡ Citrix NetScaler' },],
+            'venda-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ VENDA' },],
+            'venda-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ VENDA' },],
+            'wls-venda-sit6': [  { env: 'SIT6', app: 'ⓡ VENDA' },],
+            'venda-sit6': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ VENDA' },  {env: 'SIT6', app: 'ⓡ Citrix NetScaler' },],
+            'venda-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ VENDA' },],
+            'venda-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ VENDA' },],
+            'wls-venda-sit7': [  { env: 'SIT7', app: 'ⓡ VENDA' },],
+            'venda-sit7': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ VENDA' },  {env: 'SIT7', app: 'ⓡ Citrix NetScaler' },],
+            'venda-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ VENDA' },],
+            'venda-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ VENDA' },],
+            'wls-venda-oci1': [  { env: 'OCI1', app: 'ⓡ VENDA' },],
+            'venda-oci1': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ VENDA' },  {env: 'OCI1', app: 'ⓡ Citrix NetScaler' },],
+            'venda-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ VENDA' },],
+            'venda-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ VENDA' },],
+            'wls-venda-oci2': [  { env: 'OCI2', app: 'ⓡ VENDA' },],
+            'venda-oci2': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ VENDA' },  {env: 'OCI2', app: 'ⓡ Citrix NetScaler' },],
+            'venda-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ VENDA' },],
+            'venda-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ VENDA' },],
+            'wls-venda-oci3': [  { env: 'OCI3', app: 'ⓡ VENDA' },],
+            'venda-oci3': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ VENDA' },  {env: 'OCI3', app: 'ⓡ Citrix NetScaler' },],
+            'venda-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ VENDA' },],
+            'venda-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ VENDA' },],
+            'wls-venda-oci4': [  { env: 'OCI4', app: 'ⓡ VENDA' },],
+            'venda-oci4': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ VENDA' },  {env: 'OCI4', app: 'ⓡ Citrix NetScaler' },],
+            'venda-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ VENDA' },],
+            'venda-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ VENDA' },],
+            'wls-venda-oci5': [  { env: 'OCI5', app: 'ⓡ VENDA' },],
+            'venda-oci5': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ VENDA' },  {env: 'OCI5', app: 'ⓡ Citrix NetScaler' },],
+            'venda-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ VENDA' },],
+            'venda-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ VENDA' },],
+            'wls-venda-oci6': [  { env: 'OCI6', app: 'ⓡ VENDA' },],
+            'venda-oci6': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ VENDA' },  {env: 'OCI6', app: 'ⓡ Citrix NetScaler' },],
+            'venda-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ VENDA' },],
+            'venda-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ VENDA' },],
+            'wls-venda-oci7': [  { env: 'OCI7', app: 'ⓡ VENDA' },],
+            'venda-oci7': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ VENDA' },  {env: 'OCI7', app: 'ⓡ Citrix NetScaler' },],
+            'venda-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ VENDA' },],
+            'venda-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ VENDA' },],
+
+            // COMISSIONAMENTO
+            'wls-comissionamento-crt1': [  { env: 'CRT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-crt1': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-sit1': [  { env: 'SIT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit1': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-sit3': [  { env: 'SIT3', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit3': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-sit4': [  { env: 'SIT4', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit4': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-sit5': [  { env: 'SIT5', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit5': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-sit6': [  { env: 'SIT6', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit6': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-sit7': [  { env: 'SIT7', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit7': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-oci1': [  { env: 'OCI1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci1': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-oci2': [  { env: 'OCI2', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci2': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-oci3': [  { env: 'OCI3', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci3': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-oci4': [  { env: 'OCI4', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci4': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-oci5': [  { env: 'OCI5', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci5': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-oci6': [  { env: 'OCI6', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci6': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ COMISSIONAMENTO' },],
+            'wls-comissionamento-oci7': [  { env: 'OCI7', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci7': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ COMISSIONAMENTO' },],
+            'comissionamento-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ COMISSIONAMENTO' },],
+            
+            // NETSALES
+            'MCIDA:x1234@netsales-crt1': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ NETSALES' },  { env: 'CRT1', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'CRT1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'CRT1', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-sit1': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ NETSALES' },  { env: 'SIT1', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'SIT1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'SIT1', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-sit3': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ NETSALES' },  { env: 'SIT3', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'SIT3', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'SIT3', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-sit4': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ NETSALES' },  { env: 'SIT4', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'SIT4', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'SIT4', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-sit5': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ NETSALES' },  { env: 'SIT5', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'SIT5', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'SIT5', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-sit6': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ NETSALES' },  { env: 'SIT6', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'SIT6', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'SIT6', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-sit7': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ NETSALES' },  { env: 'SIT7', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'SIT7', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'SIT7', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-oci1': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ NETSALES' },  { env: 'OCI1', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'OCI1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'OCI1', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-oci2': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ NETSALES' },  { env: 'OCI2', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'OCI2', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'OCI2', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-oci3': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ NETSALES' },  { env: 'OCI3', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'OCI3', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'OCI3', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-oci4': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ NETSALES' },  { env: 'OCI4', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'OCI4', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'OCI4', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-oci5': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ NETSALES' },  { env: 'OCI5', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'OCI5', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'OCI5', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-oci6': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ NETSALES' },  { env: 'OCI6', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'OCI6', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'OCI6', app: 'ⓡ Citrix NetScaler' },],
+            'MCIDA:x1234@netsales-oci7': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ NETSALES' },  { env: 'OCI7', app: 'ⓡⓜⓟ COMBOMULTI (integrado)' },  { env: 'OCI7', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  {env: 'OCI7', app: 'ⓡ Citrix NetScaler' },],
+            
+            'jbs-netsales-crt1': [  { env: 'CRT1', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-sit1': [  { env: 'SIT1', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-sit3': [  { env: 'SIT3', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-sit4': [  { env: 'SIT4', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-sit5': [  { env: 'SIT5', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-sit6': [  { env: 'SIT6', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-sit7': [  { env: 'SIT7', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-oci1': [  { env: 'OCI1', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-oci2': [  { env: 'OCI2', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-oci3': [  { env: 'OCI3', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-oci4': [  { env: 'OCI4', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-oci5': [  { env: 'OCI5', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-oci6': [  { env: 'OCI6', app: 'ⓡ NETSALES' },],
+            'jbs-netsales-oci7': [  { env: 'OCI7', app: 'ⓡ NETSALES' },],
+
+            // NETSSI
+            'wls-cpi-crt1': [  { env: 'CRT1', app: 'ⓡ NETSSI' },],
+            'cpi-crt1': [  { env: 'CRT1', app: 'ⓡ NETSSI' },],
+            'cpi-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ NETSSI' },],
+            'cpi-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ NETSSI' },],
+            'wls-cpi-sit1': [  { env: 'SIT1', app: 'ⓡ NETSSI' },],
+            'cpi-sit1': [  { env: 'SIT1', app: 'ⓡ NETSSI' },],
+            'cpi-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ NETSSI' },],
+            'cpi-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ NETSSI' },],
+            'wls-cpi-sit3': [  { env: 'SIT3', app: 'ⓡ NETSSI' },],
+            'cpi-sit3': [  { env: 'SIT3', app: 'ⓡ NETSSI' },],
+            'cpi-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ NETSSI' },],
+            'cpi-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ NETSSI' },],
+            'wls-cpi-sit4': [  { env: 'SIT4', app: 'ⓡ NETSSI' },],
+            'cpi-sit4': [  { env: 'SIT4', app: 'ⓡ NETSSI' },],
+            'cpi-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ NETSSI' },],
+            'cpi-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ NETSSI' },],
+            'wls-cpi-sit5': [  { env: 'SIT5', app: 'ⓡ NETSSI' },],
+            'cpi-sit5': [  { env: 'SIT5', app: 'ⓡ NETSSI' },],
+            'cpi-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ NETSSI' },],
+            'cpi-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ NETSSI' },],
+            'wls-cpi-sit6': [  { env: 'SIT6', app: 'ⓡ NETSSI' },],
+            'cpi-sit6': [  { env: 'SIT6', app: 'ⓡ NETSSI' },],
+            'cpi-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ NETSSI' },],
+            'cpi-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ NETSSI' },],
+            'wls-cpi-sit7': [  { env: 'SIT7', app: 'ⓡ NETSSI' },],
+            'cpi-sit7': [  { env: 'SIT7', app: 'ⓡ NETSSI' },],
+            'cpi-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ NETSSI' },],
+            'cpi-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ NETSSI' },],
+            'wls-cpi-oci1': [  { env: 'OCI1', app: 'ⓡ NETSSI' },],
+            'cpi-oci1': [  { env: 'OCI1', app: 'ⓡ NETSSI' },],
+            'cpi-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ NETSSI' },],
+            'cpi-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ NETSSI' },],
+            'wls-cpi-oci2': [  { env: 'OCI2', app: 'ⓡ NETSSI' },],
+            'cpi-oci2': [  { env: 'OCI2', app: 'ⓡ NETSSI' },],
+            'cpi-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ NETSSI' },],
+            'cpi-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ NETSSI' },],
+            'wls-cpi-oci3': [  { env: 'OCI3', app: 'ⓡ NETSSI' },],
+            'cpi-oci3': [  { env: 'OCI3', app: 'ⓡ NETSSI' },],
+            'cpi-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ NETSSI' },],
+            'cpi-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ NETSSI' },],
+            'wls-cpi-oci4': [  { env: 'OCI4', app: 'ⓡ NETSSI' },],
+            'cpi-oci4': [  { env: 'OCI4', app: 'ⓡ NETSSI' },],
+            'cpi-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ NETSSI' },],
+            'cpi-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ NETSSI' },],
+            'wls-cpi-oci5': [  { env: 'OCI5', app: 'ⓡ NETSSI' },],
+            'cpi-oci5': [  { env: 'OCI5', app: 'ⓡ NETSSI' },],
+            'cpi-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ NETSSI' },],
+            'cpi-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ NETSSI' },],
+            'wls-cpi-oci6': [  { env: 'OCI6', app: 'ⓡ NETSSI' },],
+            'cpi-oci6': [  { env: 'OCI6', app: 'ⓡ NETSSI' },],
+            'cpi-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ NETSSI' },],
+            'cpi-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ NETSSI' },],
+            'wls-cpi-oci7': [  { env: 'OCI7', app: 'ⓡ NETSSI' },],
+            'cpi-oci7': [  { env: 'OCI7', app: 'ⓡ NETSSI' },],
+            'cpi-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ NETSSI' },],
+            'cpi-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ NETSSI' },],
+            
+            // Retenção e Reversão
+            'wls-retrev-crt1': [  { env: 'CRT1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-crt1.netservicos.corp': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-sit1': [  { env: 'SIT1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit1.netservicos.corp': [  { env: 'SI1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-sit3': [  { env: 'SIT3', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit3.netservicos.corp': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-sit4': [  { env: 'SIT4', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit4.netservicos.corp': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-sit5': [  { env: 'SIT5', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit5.netservicos.corp': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-sit6': [  { env: 'SIT6', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit6.netservicos.corp': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-sit7': [  { env: 'SIT7', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit7.netservicos.corp': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-oci1': [  { env: 'OCI1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci1.netservicos.corp': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-oci2': [  { env: 'OCI2', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci2.netservicos.corp': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-oci3': [  { env: 'OCI3', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci3.netservicos.corp': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-oci4': [  { env: 'OCI4', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci4.netservicos.corp': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-oci5': [  { env: 'OCI5', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci5.netservicos.corp': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-oci6': [  { env: 'OCI6', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci6.netservicos.corp': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ Retenção e Reversão' },],
+            'wls-retrev-oci7': [  { env: 'OCI7', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci7.netservicos.corp': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ Retenção e Reversão' },],
+            'retrev-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ Retenção e Reversão' },],
+
+            // SMP (aplicação consumida pelos ambientes de testes)
+            'wls-smp-crt1': [  { env: 'CRT1', app: 'ⓡ SMP' },],
+            'smp-crt1': [  { env: 'CRT1', app: 'ⓡ SMP' },],
+            'smp-crt1-vm1': [  { env: 'CRT1', app: 'ⓡ SMP' },],
+            'smp-crt1-vm2': [  { env: 'CRT1', app: 'ⓡ SMP' },],
+            'wls-smp-sit1': [  { env: 'SIT1', app: 'ⓡ SMP' },],
+            'smp-sit1': [  { env: 'SIT1', app: 'ⓡ SMP' },],
+            'smp-sit1-vm1': [  { env: 'SIT1', app: 'ⓡ SMP' },],
+            'smp-sit1-vm2': [  { env: 'SIT1', app: 'ⓡ SMP' },],
+            'wls-smp-sit3': [  { env: 'SIT3', app: 'ⓡ SMP' },],
+            'smp-sit3': [  { env: 'SIT3', app: 'ⓡ SMP' },],
+            'smp-sit3-vm1': [  { env: 'SIT3', app: 'ⓡ SMP' },],
+            'smp-sit3-vm2': [  { env: 'SIT3', app: 'ⓡ SMP' },],
+            'wls-smp-sit4': [  { env: 'SIT4', app: 'ⓡ SMP' },],
+            'smp-sit4': [  { env: 'SIT4', app: 'ⓡ SMP' },],
+            'smp-sit4-vm1': [  { env: 'SIT4', app: 'ⓡ SMP' },],
+            'smp-sit4-vm2': [  { env: 'SIT4', app: 'ⓡ SMP' },],
+            'wls-smp-sit5': [  { env: 'SIT5', app: 'ⓡ SMP' },],
+            'smp-sit5': [  { env: 'SIT5', app: 'ⓡ SMP' },],
+            'smp-sit5-vm1': [  { env: 'SIT5', app: 'ⓡ SMP' },],
+            'smp-sit5-vm2': [  { env: 'SIT5', app: 'ⓡ SMP' },],
+            'wls-smp-sit6': [  { env: 'SIT6', app: 'ⓡ SMP' },],
+            'smp-sit6': [  { env: 'SIT6', app: 'ⓡ SMP' },],
+            'smp-sit6-vm1': [  { env: 'SIT6', app: 'ⓡ SMP' },],
+            'smp-sit6-vm2': [  { env: 'SIT6', app: 'ⓡ SMP' },],
+            'wls-smp-sit7': [  { env: 'SIT7', app: 'ⓡ SMP' },],
+            'smp-sit7': [  { env: 'SIT7', app: 'ⓡ SMP' },],
+            'smp-sit7-vm1': [  { env: 'SIT7', app: 'ⓡ SMP' },],
+            'smp-sit7-vm2': [  { env: 'SIT7', app: 'ⓡ SMP' },],
+            'wls-smp-oci1': [  { env: 'OCI1', app: 'ⓡ SMP' },],
+            'smp-oci1': [  { env: 'OCI1', app: 'ⓡ SMP' },],
+            'smp-oci1-vm1': [  { env: 'OCI1', app: 'ⓡ SMP' },],
+            'smp-oci1-vm2': [  { env: 'OCI1', app: 'ⓡ SMP' },],
+            'wls-smp-oci2': [  { env: 'OCI2', app: 'ⓡ SMP' },],
+            'smp-oci2': [  { env: 'OCI2', app: 'ⓡ SMP' },],
+            'smp-oci2-vm1': [  { env: 'OCI2', app: 'ⓡ SMP' },],
+            'smp-oci2-vm2': [  { env: 'OCI2', app: 'ⓡ SMP' },],
+            'wls-smp-oci3': [  { env: 'OCI3', app: 'ⓡ SMP' },],
+            'smp-oci3': [  { env: 'OCI3', app: 'ⓡ SMP' },],
+            'smp-oci3-vm1': [  { env: 'OCI3', app: 'ⓡ SMP' },],
+            'smp-oci3-vm2': [  { env: 'OCI3', app: 'ⓡ SMP' },],
+            'wls-smp-oci4': [  { env: 'OCI4', app: 'ⓡ SMP' },],
+            'smp-oci4': [  { env: 'OCI4', app: 'ⓡ SMP' },],
+            'smp-oci4-vm1': [  { env: 'OCI4', app: 'ⓡ SMP' },],
+            'smp-oci4-vm2': [  { env: 'OCI4', app: 'ⓡ SMP' },],
+            'wls-smp-oci5': [  { env: 'OCI5', app: 'ⓡ SMP' },],
+            'smp-oci5': [  { env: 'OCI5', app: 'ⓡ SMP' },],
+            'smp-oci5-vm1': [  { env: 'OCI5', app: 'ⓡ SMP' },],
+            'smp-oci5-vm2': [  { env: 'OCI5', app: 'ⓡ SMP' },],
+            'wls-smp-oci6': [  { env: 'OCI6', app: 'ⓡ SMP' },],
+            'smp-oci6': [  { env: 'OCI6', app: 'ⓡ SMP' },],
+            'smp-oci6-vm1': [  { env: 'OCI6', app: 'ⓡ SMP' },],
+            'smp-oci6-vm2': [  { env: 'OCI6', app: 'ⓡ SMP' },],
+            'wls-smp-oci7': [  { env: 'OCI7', app: 'ⓡ SMP' },],
+            'smp-oci7': [  { env: 'OCI7', app: 'ⓡ SMP' },],
+            'smp-oci7-vm1': [  { env: 'OCI7', app: 'ⓡ SMP' },],
+            'smp-oci7-vm2': [  { env: 'OCI7', app: 'ⓡ SMP' },],
+
+            'perfil-crt1.netservicos.corp/CRT1ABC_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-crt1.netservicos.corp/CRT1BHZ_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-crt1.netservicos.corp/CRT1BRA_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-crt1.netservicos.corp/CRT1CTV_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-crt1.netservicos.corp/CRT1ISP_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },  { env: 'CRT1', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-crt1.netservicos.corp/CRT1SOC_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-crt1.netservicos.corp/CRT1SPO_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-crt1.netservicos.corp/CRT1SUL_perfil/perfil': [  { env: 'CRT1', app: 'ⓡ NETSMS (VB)' },  { env: 'CRT1', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-sit1.netservicos.corp/SIT1ABC_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit1.netservicos.corp/SIT1BHZ_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit1.netservicos.corp/SIT1BRA_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit1.netservicos.corp/SIT1CTV_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit1.netservicos.corp/SIT1ISP_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },  { env: 'SIT1', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-sit1.netservicos.corp/SIT1SOC_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit1.netservicos.corp/SIT1SPO_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit1.netservicos.corp/SIT1SUL_perfil/perfil': [  { env: 'SIT1', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT1', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-sit3.netservicos.corp/SIT3ABC_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit3.netservicos.corp/SIT3BHZ_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit3.netservicos.corp/SIT3BRA_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit3.netservicos.corp/SIT3CTV_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit3.netservicos.corp/SIT3ISP_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },  { env: 'SIT3', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-sit3.netservicos.corp/SIT3SOC_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit3.netservicos.corp/SIT3SPO_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit3.netservicos.corp/SIT3SUL_perfil/perfil': [  { env: 'SIT3', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT3', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-sit4.netservicos.corp/SIT4ABC_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit4.netservicos.corp/SIT4BHZ_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit4.netservicos.corp/SIT4BRA_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit4.netservicos.corp/SIT4CTV_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit4.netservicos.corp/SIT4ISP_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },  { env: 'SIT4', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-sit4.netservicos.corp/SIT4SOC_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit4.netservicos.corp/SIT4SPO_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit4.netservicos.corp/SIT4SUL_perfil/perfil': [  { env: 'SIT4', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT4', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-sit5.netservicos.corp/SIT5ABC_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit5.netservicos.corp/SIT5BHZ_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit5.netservicos.corp/SIT5BRA_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit5.netservicos.corp/SIT5CTV_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit5.netservicos.corp/SIT5ISP_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },  { env: 'SIT5', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-sit5.netservicos.corp/SIT5SOC_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit5.netservicos.corp/SIT5SPO_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit5.netservicos.corp/SIT5SUL_perfil/perfil': [  { env: 'SIT5', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT5', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-sit6.netservicos.corp/SIT6ABC_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit6.netservicos.corp/SIT6BHZ_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit6.netservicos.corp/SIT6BRA_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit6.netservicos.corp/SIT6CTV_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit6.netservicos.corp/SIT6ISP_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },  { env: 'SIT6', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-sit6.netservicos.corp/SIT6SOC_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit6.netservicos.corp/SIT6SPO_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit6.netservicos.corp/SIT6SUL_perfil/perfil': [  { env: 'SIT6', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT6', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-sit7.netservicos.corp/SIT7ABC_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit7.netservicos.corp/SIT7BHZ_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit7.netservicos.corp/SIT7BRA_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit7.netservicos.corp/SIT7CTV_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit7.netservicos.corp/SIT7ISP_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },  { env: 'SIT7', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-sit7.netservicos.corp/SIT7SOC_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit7.netservicos.corp/SIT7SPO_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-sit7.netservicos.corp/SIT7SUL_perfil/perfil': [  { env: 'SIT7', app: 'ⓡ NETSMS (VB)' },  { env: 'SIT7', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-oci1.netservicos.corp/OCI1ABC_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci1.netservicos.corp/OCI1BHZ_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci1.netservicos.corp/OCI1BRA_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci1.netservicos.corp/OCI1CTV_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci1.netservicos.corp/OCI1ISP_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },  { env: 'OCI1', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-oci1.netservicos.corp/OCI1SOC_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci1.netservicos.corp/OCI1SPO_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci1.netservicos.corp/OCI1SUL_perfil/perfil': [  { env: 'OCI1', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI1', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-oci2.netservicos.corp/OCI2ABC_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci2.netservicos.corp/OCI2BHZ_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci2.netservicos.corp/OCI2BRA_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci2.netservicos.corp/OCI2CTV_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci2.netservicos.corp/OCI2ISP_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },  { env: 'OCI2', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-oci2.netservicos.corp/OCI2SOC_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci2.netservicos.corp/OCI2SPO_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci2.netservicos.corp/OCI2SUL_perfil/perfil': [  { env: 'OCI2', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI2', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-oci3.netservicos.corp/OCI3ABC_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci3.netservicos.corp/OCI3BHZ_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci3.netservicos.corp/OCI3BRA_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci3.netservicos.corp/OCI3CTV_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci3.netservicos.corp/OCI3ISP_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },  { env: 'OCI3', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-oci3.netservicos.corp/OCI3SOC_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci3.netservicos.corp/OCI3SPO_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci3.netservicos.corp/OCI3SUL_perfil/perfil': [  { env: 'OCI3', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI3', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-oci4.netservicos.corp/OCI4ABC_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci4.netservicos.corp/OCI4BHZ_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci4.netservicos.corp/OCI4BRA_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci4.netservicos.corp/OCI4CTV_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci4.netservicos.corp/OCI4ISP_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },  { env: 'OCI4', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-oci4.netservicos.corp/OCI4SOC_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci4.netservicos.corp/OCI4SPO_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci4.netservicos.corp/OCI4SUL_perfil/perfil': [  { env: 'OCI4', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI4', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-oci5.netservicos.corp/OCI5ABC_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci5.netservicos.corp/OCI5BHZ_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci5.netservicos.corp/OCI5BRA_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci5.netservicos.corp/OCI5CTV_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci5.netservicos.corp/OCI5ISP_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },  { env: 'OCI5', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-oci5.netservicos.corp/OCI5SOC_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci5.netservicos.corp/OCI5SPO_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci5.netservicos.corp/OCI5SUL_perfil/perfil': [  { env: 'OCI5', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI5', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-oci6.netservicos.corp/OCI6ABC_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci6.netservicos.corp/OCI6BHZ_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci6.netservicos.corp/OCI6BRA_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci6.netservicos.corp/OCI6CTV_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci6.netservicos.corp/OCI6ISP_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },  { env: 'OCI6', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-oci6.netservicos.corp/OCI6SOC_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci6.netservicos.corp/OCI6SPO_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci6.netservicos.corp/OCI6SUL_perfil/perfil': [  { env: 'OCI6', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI6', app: 'ⓡ PERFIL WEB' },],
+
+            'perfil-oci7.netservicos.corp/OCI7ABC_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci7.netservicos.corp/OCI7BHZ_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci7.netservicos.corp/OCI7BRA_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci7.netservicos.corp/OCI7CTV_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci7.netservicos.corp/OCI7ISP_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },  { env: 'OCI7', app: 'ⓡ Citrix NetScaler' },],
+            'perfil-oci7.netservicos.corp/OCI7SOC_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci7.netservicos.corp/OCI7SPO_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },],
+            'perfil-oci7.netservicos.corp/OCI7SUL_perfil/perfil': [  { env: 'OCI7', app: 'ⓡ NETSMS (VB)' },  { env: 'OCI7', app: 'ⓡ PERFIL WEB' },],
+
+            'sso-crt1': [  { env: 'CRT1', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-sit1': [  { env: 'SIT1', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-sit3': [  { env: 'SIT3', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-sit4': [  { env: 'SIT4', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-sit5': [  { env: 'SIT5', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-sit6': [  { env: 'SIT6', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-sit7': [  { env: 'SIT7', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-oci1': [  { env: 'OCI1', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-oci2': [  { env: 'OCI2', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-oci3': [  { env: 'OCI3', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-oci4': [  { env: 'OCI4', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-oci5': [  { env: 'OCI5', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-oci6': [  { env: 'OCI6', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+            'sso-oci7': [  { env: 'OCI7', app: 'ⓡ ATLAS Suporte Operacional (SSO)' },],
+
+            'sigmaweb-crt1': [  { env: 'CRT1', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-sit1': [  { env: 'SIT1', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-sit3': [  { env: 'SIT3', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-sit4': [  { env: 'SIT4', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-sit5': [  { env: 'SIT5', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-sit6': [  { env: 'SIT6', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-sit7': [  { env: 'SIT7', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-oci1': [  { env: 'OCI1', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-oci2': [  { env: 'OCI2', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-oci3': [  { env: 'OCI3', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-oci4': [  { env: 'OCI4', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-oci5': [  { env: 'OCI5', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-oci6': [  { env: 'OCI6', app: 'ⓡ SIGMAWEB' },],
+            'sigmaweb-oci7': [  { env: 'OCI7', app: 'ⓡ SIGMAWEB' },],
+
+            //apigee OPDK (proxy reverso)
+            'test07.apigw.claro.com.br/test07': [  { env: 'CRT1', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test01.apigw.claro.com.br/test01': [  { env: 'SIT1', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test03.apigw.claro.com.br/test03': [  { env: 'SIT3', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test05.apigw.claro.com.br/test05': [  { env: 'SIT4', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test02.apigw.claro.com.br/test02': [  { env: 'SIT5', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test04.apigw.claro.com.br/test04': [  { env: 'SIT6', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test06.apigw.claro.com.br/test06': [  { env: 'SIT7', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test08.apigw.claro.com.br/test08': [  { env: 'OCI1', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test09.apigw.claro.com.br/test09': [  { env: 'OCI2', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test10.apigw.claro.com.br/test10': [  { env: 'OCI3', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test11.apigw.claro.com.br/test11': [  { env: 'OCI4', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test12.apigw.claro.com.br/test12': [  { env: 'OCI5', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test00.apigw.claro.com.br/test00': [  { env: 'OCI6', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+            'test13.apigw.claro.com.br/test13': [  { env: 'OCI7', app: 'ⓡⓜⓔ apigee OPDK (proxy reverso)' },],
+
+            //apigee SaaS (GCP)
+            'api-test.claro.com.br/test07': [  { env: 'CRT1', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test01': [  { env: 'SIT1', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test03': [  { env: 'SIT3', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test05': [  { env: 'SIT4', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test02': [  { env: 'SIT5', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test04': [  { env: 'SIT6', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test06': [  { env: 'SIT7', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test08': [  { env: 'OCI1', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test09': [  { env: 'OCI2', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test10': [  { env: 'OCI3', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test11': [  { env: 'OCI4', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test12': [  { env: 'OCI5', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test00': [  { env: 'OCI6', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+            'api-test.claro.com.br/test13': [  { env: 'OCI7', app: 'ⓡⓜⓔ apigee SaaS (GCP)' },],
+
+            'apigee.googleapis.com': [  { env: 'CRT1', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'SIT1', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'SIT3', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'SIT4', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'SIT5', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'SIT6', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'SIT7', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'OCI1', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'OCI2', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'OCI3', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'OCI4', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'OCI5', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'OCI6', app: 'ⓡⓜⓔ apigee X (Google)' },  { env: 'OCI7', app: 'ⓡⓜⓔ apigee X (Google)' },],
+
+            //modernizacaosoa
+            'modernizacaosoa.apigw.claro.com.br/test07': [  { env: 'CRT1', app: 'ⓡⓔ modernizacaosoa' },  { env: 'CRT1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'CRT1', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test01': [  { env: 'SIT1', app: 'ⓡⓔ modernizacaosoa' },  { env: 'SIT1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT1', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test03': [  { env: 'SIT3', app: 'ⓡⓔ modernizacaosoa' },  { env: 'SIT3', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT3', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test05': [  { env: 'SIT4', app: 'ⓡⓔ modernizacaosoa' },  { env: 'SIT4', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT4', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test02': [  { env: 'SIT5', app: 'ⓡⓔ modernizacaosoa' },  { env: 'SIT5', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT5', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test04': [  { env: 'SIT6', app: 'ⓡⓔ modernizacaosoa' },  { env: 'SIT6', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT6', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test06': [  { env: 'SIT7', app: 'ⓡⓔ modernizacaosoa' },  { env: 'SIT7', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT7', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test08': [  { env: 'OCI1', app: 'ⓡⓔ modernizacaosoa' },  { env: 'OCI1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI1', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test09': [  { env: 'OCI2', app: 'ⓡⓔ modernizacaosoa' },  { env: 'OCI2', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI2', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test10': [  { env: 'OCI3', app: 'ⓡⓔ modernizacaosoa' },  { env: 'OCI3', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI3', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test11': [  { env: 'OCI4', app: 'ⓡⓔ modernizacaosoa' },  { env: 'OCI4', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI4', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test12': [  { env: 'OCI5', app: 'ⓡⓔ modernizacaosoa' },  { env: 'OCI5', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI5', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test00': [  { env: 'OCI6', app: 'ⓡⓔ modernizacaosoa' },  { env: 'OCI6', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI6', app: 'ⓡ Citrix NetScaler' },],
+            'modernizacaosoa.apigw.claro.com.br/test13': [  { env: 'OCI7', app: 'ⓡⓔ modernizacaosoa' },  { env: 'OCI7', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI7', app: 'ⓡ Citrix NetScaler' },],
+
+            //TOA
+            //OBS: clarobrasil3 Telmex Mexico
+            'clarobrasil4.test.etadirect.com': [  { env: 'CRT1', app: 'ⓡⓔ TOA' },],
+            //'clarobrasil.test.etadirect.com': [  { env: 'SIT1', app: 'ⓡⓔ TOA' },],
+            //'clarobrasil7.test.etadirect.com': [  { env: 'SIT3', app: 'ⓡⓔ TOA' },],
+            'clarobrasil5.test.etadirect.com': [  { env: 'SIT4', app: 'ⓡⓔ TOA' },],
+            //'clarobrasil.test.etadirect.com': [  { env: 'SIT5', app: 'ⓡⓔ TOA' },],
+            //'clarobrasil.test.etadirect.com': [  { env: 'SIT6', app: 'ⓡⓔ TOA' },],
+            'clarobrasil3.test.etadirect.com': [  { env: 'SIT7', app: 'ⓡⓔ TOA' },],
+            'clarobrasil9.test.etadirect.com': [  { env: 'OCI1', app: 'ⓡⓔ TOA' },],
+            'clarobrasil1.test.etadirect.com': [  { env: 'OCI2', app: 'ⓡⓔ TOA' },],
+            'clarobrasil11.test.etadirect.com': [  { env: 'OCI3', app: 'ⓡⓔ TOA' },],
+            'clarobrasil10.test.etadirect.com': [  { env: 'OCI4', app: 'ⓡⓔ TOA' },],
+            //'clarobrasil14.test.etadirect.com': [  { env: 'OCI5', app: 'ⓡⓔ TOA' },],
+            //'clarobrasil10.test.etadirect.com': [  { env: 'OCI6', app: 'ⓡⓔ TOA' },],
+            'clarobrasil7.test.etadirect.com': [  { env: 'OCI7', app: 'ⓡⓔ TOA' },],
+
+            // salesforce
+            'cec-claro--preprod': [  { env: 'CRT1', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'OCI5', app: 'ⓡⓜⓟⓔ salesforce' },],
+            'cec-claro--servicart': [  { env: 'SIT1', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'SIT3', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'SIT4', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'SIT5', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'SIT6', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'SIT7', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'OCI1', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'OCI2', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'OCI3', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'OCI4', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'OCI6', app: 'ⓡⓜⓟⓔ salesforce' },  { env: 'OCI7', app: 'ⓡⓜⓟⓔ salesforce' },],
+
+            //serasa experian (Gestor de Crédito)
+            'gw-homologa': [  { env: 'CRT1', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'SIT1', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'SIT3', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'SIT4', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'SIT5', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'SIT6', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'SIT7', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'OCI1', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'OCI2', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'OCI3', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'OCI4', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'OCI5', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'OCI6', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },  { env: 'OCI7', app: 'ⓡⓔ serasa experian (Gestor de Crédito)' },],
+
+            //TRAVAS (XBRAIN)
+            'app-crt.conexaoclarobrasil.com.br': [  { env: 'CRT1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI5', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },],
+            'app-hom.conexaoclarobrasil.com.br': [  { env: 'SIT1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT3', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT4', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT5', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT6', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'SIT7', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI1', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI2', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI3', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI4', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI6', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },  { env: 'OCI7', app: 'ⓡⓟⓔ TRAVAS (XBRAIN)' },],
+
+            //A.D.
+            'ad-sit.netservicos.corp': [  { env: 'CRT1', app: 'ⓡ A.D.' },  { env: 'SIT1', app: 'ⓡ A.D.' },  { env: 'SIT3', app: 'ⓡ A.D.' },  { env: 'SIT4', app: 'ⓡ A.D.' },  { env: 'SIT5', app: 'ⓡ A.D.' },  { env: 'SIT6', app: 'ⓡ A.D.' },  { env: 'SIT7', app: 'ⓡ A.D.' },  { env: 'CRT1', app: 'ⓡ Citrix NetScaler' },  { env: 'SIT1', app: 'ⓡ Citrix NetScaler' },  { env: 'SIT3', app: 'ⓡ Citrix NetScaler' },  { env: 'SIT4', app: 'ⓡ Citrix NetScaler' },  { env: 'SIT5', app: 'ⓡ Citrix NetScaler' },  { env: 'SIT6', app: 'ⓡ Citrix NetScaler' },  { env: 'SIT7', app: 'ⓡ Citrix NetScaler' },],
+            'ad-dev.netservicos.corp': [  { env: 'CRT1', app: 'ⓡ A.D.' },  { env: 'SIT1', app: 'ⓡ A.D.' },  { env: 'SIT3', app: 'ⓡ A.D.' },  { env: 'SIT4', app: 'ⓡ A.D.' },  { env: 'SIT5', app: 'ⓡ A.D.' },  { env: 'SIT6', app: 'ⓡ A.D.' },  { env: 'SIT7', app: 'ⓡ A.D.' },],
+            'ad-oci.netservicos.corp': [  { env: 'OCI1', app: 'ⓡ A.D.' },  { env: 'OCI2', app: 'ⓡ A.D.' },  { env: 'OCI3', app: 'ⓡ A.D.' },  { env: 'OCI4', app: 'ⓡ A.D.' },  { env: 'OCI5', app: 'ⓡ A.D.' },  { env: 'OCI6', app: 'ⓡ A.D.' },  { env: 'OCI7', app: 'ⓡ A.D.' },  { env: 'OCI1', app: 'ⓡ Citrix NetScaler' },  { env: 'OCI2', app: 'ⓡ Citrix NetScaler' },  { env: 'OCI3', app: 'ⓡ Citrix NetScaler' },  { env: 'OCI4', app: 'ⓡ Citrix NetScaler' },  { env: 'OCI5', app: 'ⓡ Citrix NetScaler' },  { env: 'OCI6', app: 'ⓡ Citrix NetScaler' },  { env: 'OCI7', app: 'ⓡ Citrix NetScaler' },],
+
+            //informaticacloud
+            'dm-us.informaticacloud': [  { env: 'CRT1', app: 'ⓜⓔ informaticacloud' },  { env: 'SIT1', app: 'ⓜⓔ informaticacloud' },  { env: 'SIT3', app: 'ⓜⓔ informaticacloud' },  { env: 'SIT4', app: 'ⓜⓔ informaticacloud' },  { env: 'SIT5', app: 'ⓜⓔ informaticacloud' },  { env: 'SIT6', app: 'ⓜⓔ informaticacloud' },  { env: 'SIT7', app: 'ⓜⓔ informaticacloud' },  { env: 'OCI1', app: 'ⓜⓔ informaticacloud' },  { env: 'OCI2', app: 'ⓜⓔ informaticacloud' },  { env: 'OCI3', app: 'ⓜⓔ informaticacloud' },  { env: 'OCI4', app: 'ⓜⓔ informaticacloud' },  { env: 'OCI5', app: 'ⓜⓔ informaticacloud' },  { env: 'OCI6', app: 'ⓜⓔ informaticacloud' },  { env: 'OCI7', app: 'ⓜⓔ informaticacloud' },],
+
+            'vendasapp-crt1': [  { env: 'CRT1', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-sit1': [  { env: 'SIT1', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-sit3': [  { env: 'SIT3', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-sit4': [  { env: 'SIT4', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-sit5': [  { env: 'SIT5', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-sit6': [  { env: 'SIT6', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-sit7': [  { env: 'SIT7', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-oci1': [  { env: 'OCI1', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-oci2': [  { env: 'OCI2', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-oci3': [  { env: 'OCI3', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-oci4': [  { env: 'OCI4', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-oci5': [  { env: 'OCI5', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-oci6': [  { env: 'OCI6', app: 'ⓜ Ativação Simplifica' },],
+            'vendasapp-oci7': [  { env: 'OCI7', app: 'ⓜ Ativação Simplifica' },],
+
+        };
+
+        // Configuração dos ambientes e aplicações
+        const environments = [
+            'CRT1', 'SIT1', 'SIT3', 'SIT4', 'SIT5', 'SIT6', 'SIT7', 
+            'OCI1', 'OCI2', 'OCI3', 'OCI4', 'OCI5', 'OCI6', 'OCI7',
+        ];
+        
+        const applications = [
+            'ⓡ NETSMS (VB)',
+            'ⓡ Aqualogic Data Services Platform (DSP)', 
+            'ⓜ Enterprise Service Bus Movel (ESB)', 
+            'ⓡ Enterprise Service Bus Residencial (ESB)', 
+            'ⓡ Weblogic Integration (WLI)', 
+            'ⓡ Módulo Integrador (MI)', 
+            'ⓡ Oracle Service Bus (OSB)', 
+            'ⓡ Fachada NETSMS', 
+            'ⓡ Automação de Vendas (AUTCM)', 
+            'ⓡ COMBOMULTI (deeppurple)', 
+            'ⓡ FEPP', 
+            'ⓡ NETHOME (ATLAS)', 
+            'ⓡ NETCOBRANCA', 
+            'ⓡ COMISSIONAMENTO', 
+            'ⓡ Retenção e Reversão', 
+            'ⓡ NETSALES', 
+            'ⓡ NETSSI', 
+            'ⓡ PERFIL WEB', 
+            'ⓡ SIGMAWEB', 
+            'ⓡ SMP', 
+            'ⓡ ATLAS Suporte Operacional (SSO)', 
+            'ⓡ VENDA', 
+            'ⓡ OMS', 
+            'ⓡ CRM', 
+            'ⓡ IDP', 
+            'ⓡⓜⓔ apigee OPDK (proxy reverso)', 
+            'ⓡⓜⓔ apigee SaaS (GCP)', 
+            'ⓡⓜⓔ apigee X (Google)', 
+            'ⓡⓔ TOA', 
+            'ⓡⓜⓟ NFCON', 
+            'ⓡⓜ RGC', 
+            'ⓡⓟⓔ TRAVAS (XBRAIN)', 
+            'ⓡⓜ Reforma Tributária', 
+            'ⓡ FILAS', 
+            'ⓡ NETIN', 
+            'ⓡⓜⓟ COMBOMULTI (integrado)', 
+            'ⓡⓜⓟⓔ salesforce', 
+            'ⓜⓔ informaticacloud',
+            'ⓜ solar',
+            'ⓡ A.D.',
+            'ⓜ A.D.',
+            'ⓡⓔ serasa experian (Gestor de Crédito)',
+            'netcracker',
+            'ⓜ Ativação Simplifica',
+            'ⓜ Minha Claro',
+            'ⓡⓔ modernizacaosoa',
+            'ⓡ Citrix NetScaler',
+            'ⓡ OIC',
+            'ⓡ Hub de Pagamentos',
+        ];
+
+        // Storage para dados da aplicação
+        let applicationData = {};
+        let lastApiData = null;
+        let currentSearchQuery = '';
+        let currentStatusFilter = 'all';
+
+        // Função de pesquisa e filtros
+        function initializeSearch() {
+            const searchInput = document.getElementById('search-input');
+            const clearButton = document.getElementById('clear-search');
+            const filterChips = document.querySelectorAll('.filter-chip');
+            
+            // Configura o input de pesquisa
+            searchInput.addEventListener('input', function() {
+                currentSearchQuery = this.value.toLowerCase().trim();
+                updateSearchDisplay();
+                performSearch();
+                
+                // Mostra/esconde botão de limpar
+                clearButton.style.display = currentSearchQuery ? 'block' : 'none';
+            });
+            
+            // Botão de limpar pesquisa
+            clearButton.addEventListener('click', function() {
+                searchInput.value = '';
+                currentSearchQuery = '';
+                clearButton.style.display = 'none';
+                updateSearchDisplay();
+                performSearch();
+                searchInput.focus();
+            });
+            
+            // Filtros de status
+            filterChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    // Remove active de todos os chips
+                    filterChips.forEach(c => c.classList.remove('active'));
+                    
+                    // Adiciona active ao chip clicado
+                    this.classList.add('active');
+                    
+                    currentStatusFilter = this.dataset.filter;
+                    updateSearchDisplay();
+                    performSearch();
+                });
+            });
+            
+            // Ativa o filtro "Todos" por padrão
+            document.querySelector('[data-filter="all"]').classList.add('active');
+        }
+        
+        function updateSearchDisplay() {
+            // Esta função agora é simplificada, pois updateSearchResultsCount cuida da exibição
+            return;
+        }
+        
+        function getStatusLabel(status) {
+            const labels = {
+                'online': 'Online',
+                'offline': 'Offline', 
+                'warning': 'Lento',
+                'degraded': 'Degradado',
+                'maintenance': 'Manutenção',
+                'unknown': 'Desconhecido',
+                'all': 'Todos'
+            };
+            return labels[status] || status;
+        }
+        
+        function performSearch() {
+            let visibleCount = 0;
+            let totalCount = 0;
+            
+            // Estatísticas dos itens filtrados
+            let filteredStats = {
+                online: 0,
+                offline: 0,
+                issues: 0,
+                total: 0
+            };
+            
+            environments.forEach(env => {
+                let envHasVisible = false;
+                
+                // Encontra o container do ambiente de forma mais robusta
+                const envContainers = document.querySelectorAll('.environment');
+                let envContainer = null;
+                
+                for (let container of envContainers) {
+                    const titleElement = container.querySelector('.environment-title');
+                    if (titleElement && titleElement.textContent.trim() === env) {
+                        envContainer = container;
+                        break;
+                    }
+                }
+                
+                applications.forEach(app => {
+                    totalCount++;
+                    const appElement = document.getElementById(`${env}-${app.replace(/\s+/g, '-')}`);
+                    
+                    if (appElement) {
+                        const appData = applicationData[env] && applicationData[env][app];
+                        let isVisible = true;
+                        
+                        // Filtro de texto
+                        if (currentSearchQuery) {
+                            const searchTerms = currentSearchQuery.split(/\s+/);
+                            const searchableText = `${env} ${app}`.toLowerCase();
+                            const statusText = appData ? getStatusLabel(appData.status).toLowerCase() : '';
+                            const combinedText = `${searchableText} ${statusText}`;
+                            
+                            isVisible = searchTerms.every(term => combinedText.includes(term));
+                        }
+                        
+                        // Filtro de status
+                        if (isVisible && currentStatusFilter !== 'all' && appData) {
+                            isVisible = appData.status === currentStatusFilter;
+                        }
+                        
+                        // Aplica a visibilidade
+                        if (isVisible) {
+                            appElement.classList.remove('hidden');
+                            appElement.style.display = 'flex';
+                            envHasVisible = true;
+                            visibleCount++;
+                            
+                            // Contabiliza para estatísticas filtradas
+                            filteredStats.total++;
+                            if (appData) {
+                                if (appData.status === 'online') {
+                                    filteredStats.online++;
+                                } else if (appData.status === 'offline') {
+                                    filteredStats.offline++;
+                                    filteredStats.issues++;
+                                } else if (['warning', 'degraded'].includes(appData.status)) {
+                                    filteredStats.issues++;
+                                }
+                            }
+                        } else {
+                            appElement.classList.add('hidden');
+                            appElement.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // Mostra/esconde ambiente baseado se tem aplicações visíveis
+                if (envContainer) {
+                    if (envHasVisible) {
+                        envContainer.classList.remove('hidden');
+                        envContainer.style.display = 'block';
+                    } else {
+                        envContainer.classList.add('hidden');
+                        envContainer.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Mostra mensagem de "nenhum resultado" se necessário
+            const noResults = document.getElementById('no-results');
+            const gridContainer = document.getElementById('monitoring-grid');
+            
+            if (visibleCount === 0 && totalCount > 0) {
+                noResults.style.display = 'block';
+                gridContainer.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+                gridContainer.style.display = 'grid';
+            }
+            
+            // Atualiza contador de resultados
+            updateSearchResultsCount(visibleCount, totalCount);
+            
+            // Atualiza os cards de estatísticas com os dados filtrados
+            updateSummaryStats(filteredStats);
+        }
+
+        function updateSearchResultsCount(visible, total) {
+            const resultsDiv = document.getElementById('search-results');
+            
+            if (currentSearchQuery || currentStatusFilter !== 'all') {
+                let baseText = '';
+                
+                if (currentSearchQuery && currentStatusFilter !== 'all') {
+                    baseText = `Pesquisando por "${currentSearchQuery}" • Filtro: ${getStatusLabel(currentStatusFilter)}`;
+                } else if (currentSearchQuery) {
+                    baseText = `Pesquisando por "${currentSearchQuery}"`;
+                } else if (currentStatusFilter !== 'all') {
+                    baseText = `Filtro: ${getStatusLabel(currentStatusFilter)}`;
+                }
+                
+                const countText = visible === total ? 
+                    `${total} aplicações` : 
+                    `${visible} de ${total} aplicações`;
+                
+                resultsDiv.textContent = `${baseText} • ${countText}`;
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.style.display = 'none';
+            }
+        }
+
+        // Função para extrair hostname de URL com suporte a credenciais
+        function extractHostname(url) {
+            try {
+                // Remove protocolo
+                let cleanUrl = url.replace(/^https?:\/\//, '');
+                
+                // Remove credenciais se existirem (formato: user:password@hostname)
+                if (cleanUrl.includes('@')) {
+                    const parts = cleanUrl.split('@');
+                    cleanUrl = parts[parts.length - 1]; // Pega a parte depois do último @
+                }
+                
+                // Remove porta e path
+                cleanUrl = cleanUrl.split(':')[0].split('/')[0];
+                
+                // Remove subdomínios (pega apenas o hostname principal)
+                const domainParts = cleanUrl.split('.');
+                if (domainParts.length > 1) {
+                    cleanUrl = domainParts[0]; // Pega apenas a primeira parte
+                }
+                
+                return cleanUrl;
+            } catch (error) {
+                console.error('Erro ao extrair hostname:', error, 'URL:', url);
+                return null;
+            }
+        }
+
+        // Função para buscar dados da API
+        async function fetchMonitorData() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/monitor-data`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                lastApiData = data;
+                document.getElementById('error-message').style.display = 'none';
+                return data;
+            } catch (error) {
+                console.error('Erro ao buscar dados da API:', error);
+                document.getElementById('error-message').style.display = 'block';
+                return null;
+            }
+        }
+
+        // Função CORRIGIDA para mapear URL para aplicação e ambiente
+        function mapUrlToApp(url) {
+            const urlWithoutProtocol = url.replace(/^https?:\/\//, '');
+            
+            // Primeiro tenta busca exata incluindo credenciais
+            const authPart = urlWithoutProtocol.split('@')[0];
+            
+            if (urlWithoutProtocol.includes('@')) {
+                const fullKey = authPart + '@' + urlWithoutProtocol.split('@')[1];
+                // Remove parâmetros da query string para comparação
+                const keyToCheck = fullKey.split('?')[0];
+                
+                for (const [key, mappingArray] of Object.entries(urlToAppMapping)) {
+                    if (keyToCheck.includes(key) || key.includes(keyToCheck.split('/')[0] + '/' + keyToCheck.split('/')[1])) {
+                        return mappingArray;
+                    }
+                }
+            }
+            
+            // Busca sem credenciais, mas incluindo o path específico
+            const cleanUrl = urlWithoutProtocol.includes('@') ? 
+                urlWithoutProtocol.split('@')[1] : urlWithoutProtocol;
+            
+            const baseUrlWithPath = cleanUrl.split('?')[0]; // Remove query parameters
+            
+            for (const [key, mappingArray] of Object.entries(urlToAppMapping)) {
+                // Verifica se a URL contém exatamente a chave do mapeamento
+                if (baseUrlWithPath.includes(key)) {
+                    return mappingArray;
+                }
+            }
+            
+            return [];
+        }
+
+        // Função para determinar status baseado na resposta da API
+        function determineStatus(result) {
+            if (result.Status === 'Failed') {
+                if (result.Error.includes('Impossível conectar-se ao servidor remoto')) {
+                    return 'offline';
+                } else if (result.StatusCode === 503) {
+                    return 'maintenance';
+                } else if (result.StatusCode === 404) {
+                    return 'warning';
+                } else {
+                    return 'degraded';
+                }
+            } else if (result.Status === 'Success') {
+                if (result.ResponseTime > 2000) {
+                    return 'degraded';
+                } else if (result.ResponseTime > 1000) {
+                    return 'warning';
+                } else {
+                    return 'online';
+                }
+            }
+            
+            return 'unknown';
+        }
+
+        // Função CORRIGIDA para processar dados da API
+        function processApiData(data) {
+            // Limpa dados anteriores
+            applicationData = {};
+            
+            // Inicializa estrutura de dados
+            environments.forEach(env => {
+                applicationData[env] = {};
+                applications.forEach(app => {
+                    applicationData[env][app] = {
+                        status: 'unknown',
+                        responseTime: null,
+                        details: [],
+                        lastCheck: null
+                    };
+                });
+            });
+
+            // Processa cada resultado da API
+            data.Results.forEach(result => {
+                const mappingArray = mapUrlToApp(result.URL);
+                
+                if (mappingArray && mappingArray.length > 0) {
+                    // Processa cada mapeamento no array
+                    mappingArray.forEach(mapping => {
+                        const { env, app } = mapping;
+                        
+                        if (applicationData[env] && applicationData[env][app]) {
+                            const status = determineStatus(result);
+                            const currentApp = applicationData[env][app];
+                            
+                            // Adiciona detalhes
+                            currentApp.details.push({
+                                url: result.URL,
+                                status: status,
+                                responseTime: result.ResponseTime,
+                                statusCode: result.StatusCode,
+                                error: result.Error,
+                                timestamp: result.Timestamp
+                            });
+                            
+                            // Determina status geral (pior caso)
+                            const statusPriority = {
+                                'offline': 5,
+                                'degraded': 4,
+                                'warning': 3,
+                                'maintenance': 2,
+                                'online': 1,
+                                'unknown': 0
+                            };
+                            
+                            if (statusPriority[status] > statusPriority[currentApp.status]) {
+                                currentApp.status = status;
+                                currentApp.responseTime = result.ResponseTime;
+                            }
+                            
+                            currentApp.lastCheck = result.Timestamp;
+                        }
+                    });
+                } else {
+                    console.warn('URL não mapeada:', result.URL);
+                }
+            });
+            
+            console.log('Dados processados:', applicationData);
+        }
+
+        // Cria a estrutura da grid
+        function createMonitoringGrid() {
+            const grid = document.getElementById('monitoring-grid');
+            grid.innerHTML = '';
+            
+            environments.forEach(env => {
+                const envDiv = document.createElement('div');
+                envDiv.className = 'environment';
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'environment-title';
+                titleDiv.textContent = env;
+                
+                const appsGrid = document.createElement('div');
+                appsGrid.className = 'applications-grid';
+                
+                applications.forEach(app => {
+                    const appDiv = document.createElement('div');
+                    appDiv.className = 'application status-loading';
+                    appDiv.id = `${env}-${app.replace(/\s+/g, '-')}`;
+                    appDiv.innerHTML = `
+                        <div>${app}</div>
+                        <div class="response-time">Carregando...</div>
+                    `;
+                    appDiv.dataset.env = env;
+                    appDiv.dataset.app = app;
+                    
+                    // Adiciona evento de clique para mostrar detalhes
+                    appDiv.addEventListener('click', function() {
+                        showApplicationDetails(env, app);
+                    });
+                    
+                    appsGrid.appendChild(appDiv);
+                });
+                
+                envDiv.appendChild(titleDiv);
+                envDiv.appendChild(appsGrid);
+                grid.appendChild(envDiv);
+            });
+        }
+
+        // Atualiza a interface com os dados processados
+        function updateInterface() {
+            let stats = {
+                online: 0,
+                offline: 0,
+                issues: 0,
+                total: 0
+            };
+
+            environments.forEach(env => {
+                applications.forEach(app => {
+                    const appElement = document.getElementById(`${env}-${app.replace(/\s+/g, '-')}`);
+                    const appData = applicationData[env][app];
+                    
+                    if (appElement && appData) {
+                        appElement.className = `application status-${appData.status}`;
+                        
+                        let responseTimeText = '';
+                        if (appData.status === 'maintenance') {
+                            responseTimeText = 'Manutenção';
+                        } else if (appData.status === 'unknown') {
+                            responseTimeText = 'Sem dados';
+                        } else if (appData.responseTime !== null) {
+                            responseTimeText = `${appData.responseTime}ms`;
+                        } else {
+                            responseTimeText = 'Offline';
+                        }
+                        
+                        appElement.innerHTML = `
+                            <div>${app}</div>
+                            <div class="response-time">${responseTimeText}</div>
+                        `;
+                        
+                        // Atualiza estatísticas
+                        stats.total++;
+                        if (appData.status === 'online') {
+                            stats.online++;
+                        } else if (appData.status === 'offline') {
+                            stats.offline++;
+                            stats.issues++;
+                        } else if (['warning', 'degraded'].includes(appData.status)) {
+                            stats.issues++;
+                        }
+                    }
+                });
+            });
+
+            // Atualiza estatísticas na interface
+            updateSummaryStats(stats);
+            
+            // Atualiza timestamp
+            if (lastApiData) {
+                document.getElementById('last-update').textContent = 
+                    new Date(lastApiData.Timestamp).toLocaleString('pt-BR');
+            }
+            
+            // Aplica filtros de pesquisa se houver
+            performSearch();
+            
+            // Mostra notificação se alguma aplicação tiver problemas
+            const notification = document.getElementById('notification');
+            notification.style.display = stats.issues > 0 ? 'block' : 'none';
+            
+            // Esconde notificação após 5 segundos
+            if (stats.issues > 0) {
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Atualiza as estatísticas resumidas
+        function updateSummaryStats(stats) {
+            document.getElementById('stat-online').textContent = stats.online;
+            document.getElementById('stat-offline').textContent = stats.offline;
+            document.getElementById('stat-issues').textContent = stats.issues;
+            document.getElementById('stat-total').textContent = stats.total;
+        }
+
+        // Mostra detalhes de uma aplicação específica
+        function showApplicationDetails(env, app) {
+            const modal = document.getElementById('app-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDetails = document.getElementById('modal-details');
+            
+            // Define o título do modal
+            modalTitle.textContent = `Detalhes da Aplicação: ${env} - ${app}`;
+            
+            const appData = applicationData[env][app];
+            let detailsHTML = '';
+            
+            if (appData && appData.details.length > 0) {
+                detailsHTML = `
+                    <h3>Status Geral: ${statusToText(appData.status)}</h3>
+                    <h4>URLs Monitoradas:</h4>
+                    <table>
+                        <tr>
+                            <th>URL</th>
+                            <th>Status</th>
+                            <th>Tempo Resposta</th>
+                            <th>Código HTTP</th>
+                            <th>Último Check</th>
+                        </tr>
+                `;
+                
+                appData.details.forEach(detail => {
+                    // Mascarar credenciais na exibição da URL, mas manter o link funcional
+                    let displayUrl = detail.url;
+                    let linkHtml = '';
+                    
+                    if (displayUrl.includes('@') && displayUrl.includes('://')) {
+                        const protocol = displayUrl.split('://')[0];
+                        const urlPart = displayUrl.split('@')[1];
+                        const maskedDisplay = `${protocol}://***:***@${urlPart}`;
+                        linkHtml = `<a href="${detail.url}" target="_blank" style="word-break: break-all; text-decoration: underline; color: #007bff;">${maskedDisplay}</a>`;
+                    } else {
+                        linkHtml = `<a href="${detail.url}" target="_blank" style="word-break: break-all; text-decoration: underline; color: #007bff;">${displayUrl}</a>`;
+                    }
+                    
+                    detailsHTML += `
+                        <tr>
+                            <td style="word-break: break-all;">${linkHtml}</td>
+                            <td>${statusToText(detail.status)}</td>
+                            <td>${detail.responseTime ? detail.responseTime + 'ms' : 'N/A'}</td>
+                            <td>${detail.statusCode || 'N/A'}</td>
+                            <td>${new Date(detail.timestamp).toLocaleString('pt-BR')}</td>
+                        </tr>
+                    `;
+                    
+                    if (detail.error) {
+                        detailsHTML += `
+                            <tr>
+                                <td colspan="5" style="background-color: #f8d7da; color: #721c24; padding: 5px;">
+                                    <strong>Erro:</strong> ${detail.error}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                detailsHTML += '</table>';
+            } else {
+                detailsHTML = '<p>Nenhum dado disponível para esta aplicação.</p>';
+            }
+            
+            modalDetails.innerHTML = detailsHTML;
+            modal.style.display = 'block';
+        }
+
+        // Converte código de status para texto
+        function statusToText(status) {
+            const statusMap = {
+                'online': 'Online',
+                'offline': 'Offline',
+                'warning': 'Lento',
+                'degraded': 'Degradado',
+                'unknown': 'Desconhecido',
+                'maintenance': 'Manutenção',
+                'loading': 'Carregando'
+            };
+            
+            return statusMap[status] || 'Desconhecido';
+        }
+
+        // Atualiza todos os dados
+        async function updateAllApplicationStatus() {
+            const data = await fetchMonitorData();
+            if (data) {
+                processApiData(data);
+                updateInterface();
+            }
+        }
+
+        // Inicializa a aplicação
+        function initApp() {
+            // Inicializa tema
+            initTheme();
+            
+            // Configura evento do toggle de tema
+            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+            
+            // Inicializa funcionalidade de pesquisa
+            initializeSearch();
+            
+            createMonitoringGrid();
+            updateAllApplicationStatus();
+            
+            // Define verificação automática a cada 5 minutos
+            setInterval(updateAllApplicationStatus, 5 * 60 * 1000);
+            
+            // Botão de atualização manual
+            document.getElementById('refresh-button').addEventListener('click', updateAllApplicationStatus);
+            
+            // Fecha o modal
+            document.getElementById('close-modal').addEventListener('click', function() {
+                document.getElementById('app-modal').style.display = 'none';
+            });
+            
+            // Fecha o modal ao clicar fora dele
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('app-modal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Atalho de teclado para pesquisa (Ctrl+K ou Cmd+K)
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    document.getElementById('search-input').focus();
+                }
+            });
+        }
+
+        // Inicia a aplicação quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
