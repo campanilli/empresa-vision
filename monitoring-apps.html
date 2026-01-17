@@ -973,6 +973,17 @@
     </div> <!-- fim main-container -->
     
     <script>
+
+      async function checkAuthPage() {
+        const res = await fetch('/api/auth-check', {
+          credentials: 'include'
+        });
+
+        if (!res.ok) {
+          window.location.href = '/';
+        }
+      }
+
         // Configuração de tema
         function initTheme() {
             const savedTheme = localStorage.getItem('monitor-theme') || 'light';
