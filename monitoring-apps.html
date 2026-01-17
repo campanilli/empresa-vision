@@ -974,15 +974,17 @@
     
     <script>
 
-      async function checkAuthPage() {
-        const res = await fetch('/api/auth-check', {
-          credentials: 'include'
-        });
+        async function checkAuthPage() {
+          const res = await fetch('/api/auth-check', {
+            credentials: 'include'
+          });
 
-        if (!res.ok) {
-          window.location.href = '/';
+          if (!res.ok) {
+            window.location.href = '/';
+          }
         }
-      }
+
+        checkAuthPage();
 
         // Configuração de tema
         function initTheme() {
